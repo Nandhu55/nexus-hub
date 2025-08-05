@@ -3,139 +3,80 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BookMarked, Mail, Lock } from 'lucide-react';
+import { BookMarked, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
-import { useUsers } from '@/hooks/use-users';
 
-export default function LoginPage() {
-  const [mounted, setMounted] = useState(false);
-  const router = useRouter();
-  const { toast } = useToast();
-  const { users } = useUsers();
+export default function LandingPage() {
+    const [mounted, setMounted] = useState(false);
+    const router = useRouter();
 
-  const [studentEmail, setStudentEmail] = useState('');
-  const [studentPassword, setStudentPassword] = useState('');
-  const [adminEmail, setAdminEmail] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
-
-  useEffect(() => {
-    setMounted(true);
-    // On mount, clear any session state
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('isAdmin');
-      sessionStorage.removeItem('isLoggedIn');
-      sessionStorage.removeItem('currentUser');
-    }
-  }, []);
-
-  const handleStudentLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const user = users.find(u => u.email === studentEmail && u.password === studentPassword);
-    
-    if (user) {
+    useEffect(() => {
+        setMounted(true);
+        // Check if user is already logged in and redirect to dashboard
         if (typeof window !== 'undefined') {
-            sessionStorage.setItem('isLoggedIn', 'true');
-            sessionStorage.setItem('currentUser', JSON.stringify(user));
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+            const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+            if (isLoggedIn) {
+                router.replace('/library');
+            } else if (isAdmin) {
+                router.replace('/admin/dashboard');
+            }
         }
-        router.push('/library');
-    } else {
-        toast({
-            title: 'Login Failed',
-            description: 'Invalid student credentials. Please try again.',
-            variant: 'destructive',
-        });
-    }
-  };
-  
-  const handleAdminLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (adminEmail === 'gnreddy3555@gmail.com' && adminPassword === 'nandhu@sunny') {
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('isAdmin', 'true');
-      }
-      router.push('/admin/dashboard');
-    } else {
-      toast({
-        title: 'Login Failed',
-        description: 'Invalid admin credentials. Please try again.',
-        variant: 'destructive',
-      });
-    }
-  };
+    }, [router]);
 
-  return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
-      <div 
-        className={`transition-all duration-700 ease-out ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
-      >
-        <Card className="w-full max-w-md mx-auto shadow-2xl">
-          <CardHeader className="text-center">
-            <div className="flex justify-center items-center gap-2 mb-2">
-              <BookMarked className="h-10 w-10 text-primary" />
-              <h1 className="font-headline text-3xl font-bold text-primary">B-Tech Hub</h1>
-            </div>
-            <CardTitle className="font-headline text-2xl">Welcome Back</CardTitle>
-            <CardDescription>Sign in to access your digital library</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="student" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="student">Student</TabsTrigger>
-                <TabsTrigger value="admin">Admin</TabsTrigger>
-              </TabsList>
-              <TabsContent value="student">
-                <form onSubmit={handleStudentLogin} className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="student-email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input id="student-email" type="email" placeholder="student@example.com" required className="pl-10" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} />
+    return (
+        <div className="flex min-h-screen w-full flex-col">
+            <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/80 backdrop-blur-sm">
+                <div className="container flex h-16 items-center px-4">
+                    <Link href="/" className="flex items-center gap-3 group">
+                        <BookMarked className="h-8 w-8 text-primary group-hover:text-primary/80 transition-colors duration-300" />
+                        <span className="font-headline text-2xl font-bold text-foreground tracking-tighter group-hover:text-primary transition-colors duration-300">
+                            B-Tech Hub
+                        </span>
+                    </Link>
+                    <div className="ml-auto">
+                        <Button asChild>
+                            <Link href="/login">
+                                <span>Get Started</span>
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                        </Button>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="student-password">Password</Label>
-                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input id="student-password" type="password" placeholder="••••••••" required className="pl-10" value={studentPassword} onChange={(e) => setStudentPassword(e.target.value)} />
+                </div>
+            </header>
+            <main className="flex-1">
+                <section className="container grid lg:grid-cols-2 gap-12 items-center py-12 md:py-24 lg:py-32">
+                    <div 
+                        className={`space-y-6 transition-all duration-700 ease-out ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+                    >
+                        <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">
+                            AI-Powered Learning
+                        </div>
+                        <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl text-primary">
+                            Your Digital Library, Reimagined
+                        </h1>
+                        <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                            Access a vast collection of academic books, past exam papers, and career resources. All powered by AI to help you study smarter.
+                        </p>
+                        <Button asChild size="lg">
+                            <Link href="/login">
+                                <span>Login & Explore</span>
+                                <ArrowRight className="ml-2 h-5 w-5" />
+                            </Link>
+                        </Button>
                     </div>
-                  </div>
-                  <Button type="submit" className="w-full !mt-6">Login as Student</Button>
-                </form>
-              </TabsContent>
-              <TabsContent value="admin">
-                <form onSubmit={handleAdminLogin} className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-email">Admin Email</Label>
-                    <div className="relative">
-                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input id="admin-email" type="email" placeholder="admin@example.com" required className="pl-10" value={adminEmail} onChange={(e) => setAdminEmail(e.target.value)} />
+                     <div 
+                        className={`transition-all duration-700 ease-out delay-200 ${mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
+                    >
+                        <img
+                          src="https://placehold.co/600x400.png"
+                          alt="B-Tech Hub Platform"
+                          className="mx-auto aspect-video overflow-hidden rounded-xl object-cover"
+                          data-ai-hint="library technology"
+                        />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-password">Admin Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input id="admin-password" type="password" placeholder="••••••••" required className="pl-10" value={adminPassword} onChange={(e) => setAdminPassword(e.target.value)} />
-                    </div>
-                  </div>
-                  <Button type="submit" className="w-full !mt-6">Login as Admin</Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="underline text-primary hover:text-primary/80">
-                Sign up
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
+                </section>
+            </main>
+        </div>
+    );
 }

@@ -97,10 +97,10 @@ export default function SignupPage() {
       >
         <Card className="w-full max-w-lg mx-auto shadow-2xl">
           <CardHeader className="text-center">
-            <div className="flex justify-center items-center gap-2 mb-2">
-              <BookMarked className="h-10 w-10 text-primary" />
-              <h1 className="font-headline text-3xl font-bold text-primary">B-Tech Hub</h1>
-            </div>
+            <Link href="/" className="flex justify-center items-center gap-2 mb-2 group">
+              <BookMarked className="h-10 w-10 text-primary group-hover:text-primary/80 transition-colors" />
+              <h1 className="font-headline text-3xl font-bold text-primary group-hover:text-primary/80 transition-colors">B-Tech Hub</h1>
+            </Link>
             <CardTitle className="font-headline text-2xl">Create an Account</CardTitle>
             <CardDescription>Join our community of learners today</CardDescription>
           </CardHeader>
@@ -205,7 +205,7 @@ export default function SignupPage() {
 
             <div className="mt-4 text-center text-sm">
               Already have an account?{' '}
-              <Link href="/" className="underline text-primary hover:text-primary/80">
+              <Link href="/login" className="underline text-primary hover:text-primary/80">
                 Sign in
               </Link>
             </div>
