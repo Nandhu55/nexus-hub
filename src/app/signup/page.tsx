@@ -4,14 +4,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BookMarked, User, Mail, Lock, Eye, EyeOff, KeyRound } from 'lucide-react';
+import { BookMarked, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 import { years, courses } from '@/lib/data';
 import { createClient } from '@/lib/supabase/client';
 
@@ -33,8 +32,7 @@ export default function SignupPage() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1);
-  const [otp, setOtp] = useState("");
+  
   const [formData, setFormData] = useState({
       firstName: '',
       lastName: '',
@@ -60,7 +58,7 @@ export default function SignupPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   }
 
-  const handleSendOtp = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
@@ -76,48 +74,12 @@ export default function SignupPage() {
       return;
     }
 
-    const res = await fetch('/api/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email }),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-        toast({ title: 'OTP Sent!', description: 'Check your email for the verification code.' });
-        setStep(2);
-    } else {
-        toast({ title: 'Failed to Send OTP', description: data.error, variant: 'destructive' });
-    }
-
-    setLoading(false);
-  };
-  
-  const handleVerifyOtpAndSignup = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-
-    const verifyRes = await fetch('/api/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, otp }),
-    });
-
-    const verifyData = await verifyRes.json();
-
-    if (!verifyRes.ok) {
-        toast({ title: "OTP Verification Failed", description: verifyData.error, variant: "destructive" });
-        setLoading(false);
-        return;
-    }
-
     const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
             data: {
-                name: `${formData.firstName} ${formData.lastName}`,
+                name: `${'\'\'\''}${formData.firstName} ${formData.lastName}${'\'\'\''}`,
                 first_name: formData.firstName,
                 last_name: formData.lastName,
                 username: formData.username,
@@ -131,8 +93,9 @@ export default function SignupPage() {
     if (error) {
         toast({ title: "Signup Error", description: error.message, variant: "destructive" });
     } else if (data.user) {
-        toast({ title: "Account Created!", description: "You have successfully signed up. Please log in." });
-        router.push('/login');
+        // Supabase sends a confirmation email. The user is not yet signed in.
+        // Redirect to a page that tells them to check their email.
+        router.push('/verify-email');
     }
     setLoading(false);
   }
@@ -148,25 +111,24 @@ export default function SignupPage() {
               <BookMarked className="h-10 w-10 text-primary group-hover:text-primary/80 transition-colors" />
               <h1 className="font-headline text-3xl font-bold text-primary group-hover:text-primary/80 transition-colors">B-Tech Hub</h1>
             </Link>
-            <CardTitle className="font-headline text-2xl">{step === 1 ? "Create an Account" : "Verify Your Email"}</CardTitle>
-            <CardDescription>{step === 1 ? "Join our community of learners today" : "Enter the OTP sent to your email"}</CardDescription>
+            <CardTitle className="font-headline text-2xl">Create an Account</CardTitle>
+            <CardDescription>Join our community of learners today</CardDescription>
           </CardHeader>
           <CardContent>
-            {step === 1 && (
-                <form onSubmit={handleSendOtp} className="space-y-4">
+            <form onSubmit={handleSignup} className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor="firstName">First Name</Label>
                         <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input id="firstName" name="firstName" placeholder="John" required className="pl-10" value={formData.firstName} onChange={handleInputChange} />
+                        <Input id="firstName" name="firstName" placeholder="John" required className="pl-10" value={formData.firstName} onChange={handleInputChange} disabled={loading} />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="lastName">Last Name</Label>
                         <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input id="lastName" name="lastName" placeholder="Doe" required className="pl-10" value={formData.lastName} onChange={handleInputChange} />
+                        <Input id="lastName" name="lastName" placeholder="Doe" required className="pl-10" value={formData.lastName} onChange={handleInputChange} disabled={loading} />
                         </div>
                     </div>
                 </div>
@@ -174,14 +136,14 @@ export default function SignupPage() {
                     <Label htmlFor="username">Username</Label>
                     <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input id="username" name="username" placeholder="johndoe123" required className="pl-10" value={formData.username} onChange={handleInputChange} />
+                        <Input id="username" name="username" placeholder="johndoe123" required className="pl-10" value={formData.username} onChange={handleInputChange} disabled={loading} />
                     </div>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <div className="relative">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input id="email" name="email" type="email" placeholder="student@example.com" required className="pl-10" value={formData.email} onChange={handleInputChange} />
+                        <Input id="email" name="email" type="email" placeholder="student@example.com" required className="pl-10" value={formData.email} onChange={handleInputChange} disabled={loading} />
                     </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -189,7 +151,7 @@ export default function SignupPage() {
                     <Label htmlFor="password">Password</Label>
                     <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input id="password" name="password" type={passwordVisible ? "text" : "password"} placeholder="••••••••" required className="pl-10 pr-10" value={formData.password} onChange={handleInputChange} />
+                        <Input id="password" name="password" type={passwordVisible ? "text" : "password"} placeholder="••••••••" required className="pl-10 pr-10" value={formData.password} onChange={handleInputChange} disabled={loading} />
                         <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground" onClick={() => setPasswordVisible(!passwordVisible)}>
                             {passwordVisible ? <EyeOff /> : <Eye />}
                         </Button>
@@ -199,7 +161,7 @@ export default function SignupPage() {
                     <Label htmlFor="confirmPassword">Confirm Password</Label>
                     <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                        <Input id="confirmPassword" name="confirmPassword" type={confirmPasswordVisible ? "text" : "password"} placeholder="••••••••" required className="pl-10 pr-10" value={formData.confirmPassword} onChange={handleInputChange} />
+                        <Input id="confirmPassword" name="confirmPassword" type={confirmPasswordVisible ? "text" : "password"} placeholder="••••••••" required className="pl-10 pr-10" value={formData.confirmPassword} onChange={handleInputChange} disabled={loading} />
                         <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground" onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
                             {confirmPasswordVisible ? <EyeOff /> : <Eye />}
                         </Button>
@@ -233,32 +195,9 @@ export default function SignupPage() {
                 </div>
 
                 <Button type="submit" className="w-full !mt-6" disabled={loading}>
-                    {loading ? 'Sending OTP...' : 'Continue'}
+                    {loading ? 'Creating Account...' : 'Create Account'}
                 </Button>
-                </form>
-            )}
-
-            {step === 2 && (
-                <form onSubmit={handleVerifyOtpAndSignup} className="space-y-6">
-                    <div className="flex flex-col items-center justify-center">
-                        <KeyRound className="h-8 w-8 text-primary mb-4" />
-                        <InputOTP maxLength={6} value={otp} onChange={setOtp}>
-                            <InputOTPGroup>
-                                <InputOTPSlot index={0} />
-                                <InputOTPSlot index={1} />
-                                <InputOTPSlot index={2} />
-                                <InputOTPSlot index={3} />
-                                <InputOTPSlot index={4} />
-                                <InputOTPSlot index={5} />
-                            </InputOTPGroup>
-                        </InputOTP>
-                    </div>
-                    <Button type="submit" className="w-full" disabled={loading || otp.length < 6}>
-                        {loading ? 'Verifying...' : 'Verify & Create Account'}
-                    </Button>
-                    <Button variant="link" className="w-full" onClick={() => setStep(1)}>Back to Signup</Button>
-                </form>
-            )}
+            </form>
             
             <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
