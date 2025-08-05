@@ -18,11 +18,14 @@ export async function POST(request: Request) {
         .insert([{ email, otp, expires_at }]);
 
     if (dbError) {
+        console.error('Supabase OTP insert error:', dbError);
         return NextResponse.json({ error: 'Failed to store OTP' }, { status: 500 });
     }
 
     const transporter = nodemailer.createTransport({
-        service: 'Gmail',
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
@@ -30,10 +33,17 @@ export async function POST(request: Request) {
     });
 
     const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: `"B-Tech Hub" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: 'Your B-Tech Hub OTP Code',
-        text: `Your OTP code is ${otp}. It is valid for 10 minutes.`,
+        html: `
+            <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+                <h2>B-Tech Hub Verification</h2>
+                <p>Your One-Time Password (OTP) is:</p>
+                <p style="font-size: 24px; font-weight: bold; letter-spacing: 4px; border: 1px solid #ccc; padding: 10px; display: inline-block;">${otp}</p>
+                <p>This code is valid for 10 minutes.</p>
+            </div>
+        `,
     };
 
     try {
@@ -41,6 +51,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'OTP sent successfully' });
     } catch (error) {
         console.error('Failed to send email:', error);
-        return NextResponse.json({ error: 'Failed to send OTP' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to send OTP email.' }, { status: 500 });
     }
 }
