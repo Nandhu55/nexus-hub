@@ -24,7 +24,7 @@ export default function CareerGuidancePage() {
       icon: Lightbulb,
       title: 'Exploring Career Paths',
       description: 'Discover various career paths available for your engineering discipline. Understand roles, responsibilities, and future scope.',
-      href: '#',
+      href: '/career-guidance/paths',
       external: false,
     },
   ];
