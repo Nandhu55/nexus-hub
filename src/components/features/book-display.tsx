@@ -74,7 +74,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
     setIsReading(true);
   }
 
-  if (isReading) {
+  if (isReading && hasPdf) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col">
           <header className="flex items-center justify-between p-2 sm:p-4 border-b bg-card">
@@ -168,7 +168,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
 
                   <AiSummarizer book={book} />
 
-                  <Remarks bookId={book.id} />
+                  <Remarks bookId={parseInt(book.id)} />
               </div>
             </div>
         </div>
