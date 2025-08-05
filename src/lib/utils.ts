@@ -10,13 +10,23 @@ export function transformGoogleDriveLink(url: string, forDownload = false): stri
   if (!url || typeof url !== 'string') {
     return '#';
   }
+
+  const patterns = [
+    /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/,
+    /drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/,
+    /drive\.google\.com\/uc\?id=([a-zA-Z0-9_-]+)/,
+  ];
+
+  let fileId = null;
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      fileId = match[1];
+      break;
+    }
+  }
   
-  // Regular expression to capture the file ID from various Google Drive link formats
-  const googleDriveRegex = /drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([a-zA-Z0-9_-]+)/;
-  const match = url.match(googleDriveRegex);
-  
-  if (match && match[1]) {
-    const fileId = match[1];
+  if (fileId) {
     if (forDownload) {
       // This link forces a download prompt.
       return `https://drive.google.com/uc?export=download&id=${fileId}`;
