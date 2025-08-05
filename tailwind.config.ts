@@ -8,6 +8,13 @@ export default {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       fontFamily: {
         body: ['var(--font-exo2)', 'sans-serif'],
@@ -93,6 +100,13 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
+      backgroundImage: {
+        'grid-cyan': 'linear-gradient(to right, hsl(var(--primary)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--primary)) 1px, transparent 1px)',
+        'shimmer-bg': 'radial-gradient(ellipse 50% 50% at 50% 50%, hsl(var(--primary) / 0.1), transparent)',
+      },
+      backgroundSize: {
+        'grid-cyan': '2rem 2rem',
+      }
     },
   },
   plugins: [require('tailwindcss-animate')],
