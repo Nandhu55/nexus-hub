@@ -10,7 +10,7 @@ interface BookCardProps {
 
 export function BookCard({ book }: BookCardProps) {
   return (
-    <Link href={`/reader/${book.id}`} className="group block">
+    <Link href={`/reader/${book.id}`} className="group block h-full">
       <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col">
         <div className="relative w-full aspect-[2/3]">
           <Image
@@ -21,10 +21,10 @@ export function BookCard({ book }: BookCardProps) {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
-        <CardContent className="p-4 flex flex-col flex-grow">
-          <Badge variant="secondary" className="self-start mb-2">{book.category}</Badge>
-          <h3 className="font-semibold font-headline text-lg leading-tight truncate">{book.title}</h3>
-          <p className="text-sm text-muted-foreground mt-1 flex-grow">{book.author}</p>
+        <CardContent className="p-3 flex flex-col flex-grow">
+          <h3 className="font-semibold font-headline text-base leading-tight truncate group-hover:text-primary">{book.title}</h3>
+          <p className="text-xs text-muted-foreground mt-1 flex-grow">{book.author}</p>
+          <Badge variant="secondary" className="self-start mt-2 text-xs">{book.category}</Badge>
         </CardContent>
       </Card>
     </Link>
