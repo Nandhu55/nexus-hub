@@ -64,6 +64,20 @@ export const useNotifications = () => {
       }
   }
 
+  const addNotification = useCallback((notif: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+    const newNotification: Notification = {
+      ...notif,
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      read: false,
+    };
+    setNotifications(prev => {
+      const updated = [newNotification, ...prev];
+      updateStoredNotifications(updated);
+      return updated;
+    });
+  }, []);
+
   const clearNotifications = useCallback(() => {
     setNotifications([]);
     updateStoredNotifications([]);
@@ -77,5 +91,5 @@ export const useNotifications = () => {
     });
   }, []);
 
-  return { notifications, clearNotifications, markAsRead };
+  return { notifications, addNotification, clearNotifications, markAsRead };
 };
