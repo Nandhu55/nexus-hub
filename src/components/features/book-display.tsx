@@ -75,7 +75,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
     setIsReading(true);
   }
 
-  if (isReading && hasPdf) {
+  if (isReading) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col">
           <header className="flex items-center justify-between p-2 sm:p-4 border-b bg-card">
@@ -146,11 +146,11 @@ export default function BookDisplay({ book }: BookDisplayProps) {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <Button size="lg" onClick={handleRead} disabled={!hasPdf}>
+                    <Button size="lg" onClick={handleRead}>
                         <BookOpen className="mr-2 h-5 w-5" />
-                        {hasPdf ? 'Read Now' : 'Reading not available'}
+                        Read Now
                     </Button>
-                    <Button variant="outline" onClick={handleDownload} disabled={!hasPdf}>
+                    <Button variant="outline" onClick={handleDownload}>
                         <Download className="mr-2 h-5 w-5" />
                         Download
                     </Button>
@@ -170,7 +170,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
 
                     <AiSummarizer book={book} />
 
-                    <Remarks bookId={book.id as unknown as number} />
+                    <Remarks bookId={(book.id as unknown as number)} />
                 </div>
             </div>
         </div>
