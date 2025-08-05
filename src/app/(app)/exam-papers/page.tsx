@@ -62,6 +62,7 @@ export default function ExamPapersPage() {
   });
 
   const displayYears = ['All', ...years];
+  const displayCategories = ['All', ...categories.filter(c => c !== 'Finance' && c !== 'Motivation')];
   
   if (readingPaper) {
     const readUrl = transformGoogleDriveLink(readingPaper.downloadUrl, false);
@@ -101,7 +102,7 @@ export default function ExamPapersPage() {
         <div className="space-y-4">
           <div className="flex items-baseline gap-2 flex-wrap">
               <span className="text-sm font-medium text-muted-foreground w-full sm:w-20 shrink-0">Branch:</span>
-              {categories.map(category => (
+              {displayCategories.map(category => (
               <Button 
                   key={category}
                   size="sm"

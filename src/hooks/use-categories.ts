@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,14 +15,13 @@ export function useCategories() {
         setCategories(JSON.parse(storedCategories));
       } else {
         // If nothing in storage, initialize with default categories
-        const allCategories = ['All', ...initialCategories];
-        setCategories(allCategories);
-        localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(allCategories));
+        setCategories(initialCategories);
+        localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(initialCategories));
       }
     } catch (error) {
       // If any error (e.g. in SSR), use initial categories
       console.error("Failed to access local storage for categories:", error);
-      setCategories(['All', ...initialCategories]);
+      setCategories(initialCategories);
     }
   }, []);
 

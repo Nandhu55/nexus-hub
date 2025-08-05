@@ -26,7 +26,7 @@ export function BookRecommender() {
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const bookCategories = categories.filter(c => c !== 'All');
+  const bookCategories = categories;
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategories((prev) =>
