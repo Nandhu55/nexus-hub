@@ -15,7 +15,7 @@ export function BookCard({ book }: BookCardProps) {
     <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 ease-in-out bg-card/60 backdrop-blur-sm border-primary/20 hover:border-primary/80 hover:shadow-[0_0_20px_theme(colors.primary.DEFAULT)] hover:-translate-y-1">
       <div className="relative aspect-[2/3] w-full">
         <Image
-          src={book.cover}
+          src={book.coverImage}
           alt={`Cover of ${book.title}`}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -37,8 +37,11 @@ export function BookCard({ book }: BookCardProps) {
     </Card>
   );
 
+  const isAcademic = book.category !== 'Finance' && book.category !== 'Motivation';
+  const href = isAcademic ? `/academic-book/${book.id}` : `/book/${book.id}`;
+
   return (
-    <Link href={`/reader/${book.id}`} className="group block h-full">
+    <Link href={href} className="group block h-full">
       {cardContent}
     </Link>
   );

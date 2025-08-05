@@ -1,64 +1,176 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
-import type { Book } from '@/lib/data';
+import { useRouter } from 'next/navigation';
+import { Download, Share2, BookOpen, ArrowLeft, Star, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AiSummarizer } from '@/components/reader/AiSummarizer';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { BookRecommender } from '@/components/library/BookRecommender';
+import { useToast } from '@/hooks/use-toast';
+import { cn, transformGoogleDriveLink } from '@/lib/utils';
+import type { Book } from '@/lib/data';
+import Remarks from '@/components/features/remarks';
 
 interface BookDisplayProps {
   book: Book;
 }
 
 export default function BookDisplay({ book }: BookDisplayProps) {
-  return (
-    <div className="max-w-5xl mx-auto">
-      <div className="grid md:grid-cols-3 gap-8 md:gap-12">
-        <div className="md:col-span-1">
-          <div className="sticky top-8 space-y-4">
-            <div className="shadow-lg rounded-lg overflow-hidden">
-                <Image
-                    src={book.cover}
-                    alt={`Cover of ${book.title}`}
-                    width={400}
-                    height={600}
-                    data-ai-hint={book.dataAiHint || 'book cover'}
-                    className="w-full"
-                />
-            </div>
-            <h1 className="text-3xl font-bold font-headline">{book.title}</h1>
-            <p className="text-lg text-muted-foreground">{book.author}</p>
-            <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">{book.category}</Badge>
-                {book.year && <Badge variant="secondary">{book.year}</Badge>}
-            </div>
-            <p className="text-sm">{book.description}</p>
-          </div>
-        </div>
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isReading, setIsReading] = useState(false);
 
-        <div className="md:col-span-2 space-y-6">
-          <AiSummarizer book={book} />
+  const hasPdf = book.pdfUrl && book.pdfUrl !== '#';
 
-          <div>
-             <h2 className="text-2xl font-bold font-headline mb-4 border-b pb-2">Book Content</h2>
-             <ScrollArea className="h-[600px] p-4 border rounded-lg bg-secondary/30">
-                <p className="text-base leading-relaxed whitespace-pre-wrap">{book.content}</p>
-                <p className="text-base leading-relaxed whitespace-pre-wrap mt-4">
-                  {book.content.repeat(5)}
-                </p>
-                <p className="text-base leading-relaxed whitespace-pre-wrap mt-4 font-bold text-center">
-                    ... End of preview ...
-                </p>
-             </ScrollArea>
-          </div>
+  const handleShare = async () => {
+    const fallbackCopyLink = () => {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link Copied",
+        description: "A link to this book has been copied to your clipboard.",
+      });
+    };
 
-          <div className="space-y-4">
-             <h2 className="text-2xl font-bold font-headline mb-4 border-b pb-2">Find Your Next Read</h2>
-             <BookRecommender />
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: book.title,
+          text: `Check out this book: ${book.title} by ${book.author}`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        fallbackCopyLink();
+      }
+    } else {
+      fallbackCopyLink();
+    }
+  };
+
+  const handleDownload = () => {
+    if (!hasPdf) {
+      toast({
+          title: "Download Unavailable",
+          description: "No PDF document is available for this book.",
+          variant: "destructive"
+      });
+      return;
+    }
+    const downloadUrl = transformGoogleDriveLink(book.pdfUrl, true);
+    window.open(downloadUrl, '_blank');
+  };
+
+  const handleRead = () => {
+     if (!hasPdf) {
+      toast({
+          title: "Read Unavailable",
+          description: "No PDF document is available for this book.",
+          variant: "destructive"
+      });
+      return;
+    }
+    setIsReading(true);
+  }
+
+  if (isReading) {
+    const readUrl = transformGoogleDriveLink(book.pdfUrl, false);
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex flex-col">
+          <header className="flex items-center justify-between p-2 sm:p-4 border-b bg-card">
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" onClick={() => router.back()} className="hidden sm:inline-flex">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to library
+                </Button>
+                 <div className="w-px h-8 bg-border mx-2 hidden sm:block" />
+                <div>
+                    <h1 className="font-bold text-lg line-clamp-1">{book.title}</h1>
+                    <p className="text-sm text-muted-foreground">{book.author}</p>
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => setIsReading(false)}>
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Close Reader</span>
+              </Button>
+          </header>
+          <div className="flex-1 overflow-auto">
+             <iframe src={readUrl} className="w-full h-full" title={book.title} />
           </div>
-        </div>
       </div>
-    </div>
+    );
+  }
+  
+  return (
+      <>
+        <div className="max-w-5xl mx-auto space-y-8 md:space-y-12">
+            <Button variant="ghost" onClick={() => router.back()} className="mb-4">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to library
+            </Button>
+            <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+            <div className="md:col-span-1">
+                <div className="md:sticky md:top-24">
+                <div className="relative aspect-[2/3] w-full max-w-xs mx-auto shadow-lg rounded-lg overflow-hidden">
+                    <Image
+                    src={book.coverImage}
+                    alt={`Cover of ${book.title}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    data-ai-hint={book.dataAiHint}
+                    />
+                </div>
+                </div>
+            </div>
+            <div className="md:col-span-2">
+                <Badge variant="secondary">{book.category}</Badge>
+                <h1 className="font-headline text-3xl md:text-5xl font-bold mt-2">{book.title}</h1>
+                <p className="mt-2 text-lg md:text-xl text-muted-foreground">by {book.author}</p>
+                
+                <div className="mt-4 flex items-center gap-2">
+                    <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                        <Star
+                        key={i}
+                        className={cn(
+                            'h-6 w-6',
+                            book.rating && i < Math.floor(book.rating)
+                            ? 'text-yellow-400 fill-yellow-400'
+                            : 'text-gray-300'
+                        )}
+                        />
+                    ))}
+                    </div>
+                    <span className="text-muted-foreground font-medium">{book.rating?.toFixed(1) || 'N/A'}</span>
+                </div>
+
+                <div className="my-6 space-y-2">
+                
+                <Button className="w-full md:w-auto" size="lg" onClick={handleRead} disabled={!hasPdf}>
+                    <BookOpen className="mr-2 h-5 w-5" />
+                    {hasPdf ? 'Read Now' : 'Reading not available'}
+                </Button>
+                
+                <div className="flex flex-col sm:flex-row gap-2">
+                    <Button className="w-full md:w-auto" variant="secondary" onClick={handleDownload} disabled={!hasPdf}>
+                        <Download className="mr-2 h-5 w-5" />
+                        Download
+                    </Button>
+                    <Button className="w-full md:w-auto" variant="secondary" onClick={handleShare}>
+                        <Share2 className="mr-2 h-5 w-5" />
+                        Share
+                    </Button>
+                </div>
+                </div>
+
+                <div className="prose dark:prose-invert max-w-none">
+                <h2 className="font-headline text-2xl font-semibold">Description</h2>
+                <p>{book.description}</p>
+                </div>
+
+            </div>
+            </div>
+            <Remarks bookId={book.id} />
+        </div>
+      </>
   );
 }
