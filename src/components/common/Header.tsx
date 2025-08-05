@@ -115,10 +115,13 @@ export function Header({ user }: { user: User }) {
   }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-    router.refresh();
-  }
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Logout error:', error.message);
+    } else {
+      router.push('/login');
+    }
+  };
 
   const userMetadata = user.user_metadata;
 
