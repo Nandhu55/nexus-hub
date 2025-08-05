@@ -37,11 +37,8 @@ export function BookCard({ book }: BookCardProps) {
     </Card>
   );
 
-  const isAcademic = book.category !== 'Finance' && book.category !== 'Motivation';
-  const href = isAcademic ? `/academic-book/${book.id}` : `/book/${book.id}`;
-
   return (
-    <Link href={href} className="group block h-full">
+    <Link href={`/book/${book.id}`} className="group block h-full">
       {cardContent}
     </Link>
   );

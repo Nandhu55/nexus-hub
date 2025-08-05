@@ -11,6 +11,7 @@ import { cn, transformGoogleDriveLink } from '@/lib/utils';
 import type { Book } from '@/lib/data';
 import Remarks from '@/components/features/remarks';
 import PdfViewer from './PdfViewer';
+import { AiSummarizer } from '@/components/reader/AiSummarizer';
 
 interface BookDisplayProps {
   book: Book;
@@ -102,75 +103,74 @@ export default function BookDisplay({ book }: BookDisplayProps) {
   
   return (
       <>
-        <div className="max-w-5xl mx-auto space-y-8 md:space-y-12">
+        <div className="max-w-6xl mx-auto space-y-8 md:space-y-12">
             <Button variant="ghost" onClick={() => router.back()} className="mb-4">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to library
             </Button>
-            <div className="grid md:grid-cols-3 gap-8 md:gap-12">
-            <div className="md:col-span-1">
-                <div className="md:sticky md:top-24">
-                <div className="relative aspect-[2/3] w-full max-w-xs mx-auto shadow-lg rounded-lg overflow-hidden">
-                    <Image
-                    src={book.coverImage}
-                    alt={`Cover of ${book.title}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    data-ai-hint={book.dataAiHint}
-                    />
-                </div>
-                </div>
-            </div>
-            <div className="md:col-span-2">
-                <Badge variant="secondary">{book.category}</Badge>
-                <h1 className="font-headline text-3xl md:text-5xl font-bold mt-2">{book.title}</h1>
-                <p className="mt-2 text-lg md:text-xl text-muted-foreground">by {book.author}</p>
-                
-                <div className="mt-4 flex items-center gap-2">
-                    <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                        <Star
-                        key={i}
-                        className={cn(
-                            'h-6 w-6',
-                            book.rating && i < Math.floor(book.rating)
-                            ? 'text-yellow-400 fill-yellow-400'
-                            : 'text-gray-300'
-                        )}
-                        />
-                    ))}
+            <div className="grid md:grid-cols-12 gap-8 md:gap-12">
+              <div className="md:col-span-4 lg:col-span-3">
+                  <div className="md:sticky md:top-24">
+                  <div className="relative aspect-[2/3] w-full max-w-xs mx-auto shadow-lg rounded-lg overflow-hidden">
+                      <Image
+                      src={book.coverImage}
+                      alt={`Cover of ${book.title}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      data-ai-hint={book.dataAiHint}
+                      />
+                  </div>
+                   <div className="mt-4 flex flex-col gap-2">
+                        <Button className="w-full" size="lg" onClick={handleRead} disabled={!hasPdf}>
+                            <BookOpen className="mr-2 h-5 w-5" />
+                            {hasPdf ? 'Read Now' : 'Reading not available'}
+                        </Button>
+                        <Button className="w-full" variant="secondary" onClick={handleDownload} disabled={!hasPdf}>
+                            <Download className="mr-2 h-5 w-5" />
+                            Download
+                        </Button>
+                        <Button className="w-full" variant="secondary" onClick={handleShare}>
+                            <Share2 className="mr-2 h-5 w-5" />
+                            Share
+                        </Button>
                     </div>
-                    <span className="text-muted-foreground font-medium">{book.rating?.toFixed(1) || 'N/A'}</span>
-                </div>
+                  </div>
+              </div>
+              <div className="md:col-span-8 lg:col-span-9 space-y-8">
+                  <div className="space-y-2">
+                    <Badge variant="secondary">{book.category}</Badge>
+                    <h1 className="font-headline text-3xl md:text-5xl font-bold mt-2">{book.title}</h1>
+                    <p className="mt-2 text-lg md:text-xl text-muted-foreground">by {book.author}</p>
+                    
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                            <Star
+                            key={i}
+                            className={cn(
+                                'h-6 w-6',
+                                book.rating && i < Math.floor(book.rating)
+                                ? 'text-yellow-400 fill-yellow-400'
+                                : 'text-gray-300'
+                            )}
+                            />
+                        ))}
+                        </div>
+                        <span className="text-muted-foreground font-medium">{book.rating?.toFixed(1) || 'N/A'}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="prose dark:prose-invert max-w-none">
+                    <h2 className="font-headline text-2xl font-semibold">Description</h2>
+                    <p>{book.description}</p>
+                  </div>
 
-                <div className="my-6 space-y-2">
-                
-                <Button className="w-full md:w-auto" size="lg" onClick={handleRead} disabled={!hasPdf}>
-                    <BookOpen className="mr-2 h-5 w-5" />
-                    {hasPdf ? 'Read Now' : 'Reading not available'}
-                </Button>
-                
-                <div className="flex flex-col sm:flex-row gap-2">
-                    <Button className="w-full md:w-auto" variant="secondary" onClick={handleDownload} disabled={!hasPdf}>
-                        <Download className="mr-2 h-5 w-5" />
-                        Download
-                    </Button>
-                    <Button className="w-full md:w-auto" variant="secondary" onClick={handleShare}>
-                        <Share2 className="mr-2 h-5 w-5" />
-                        Share
-                    </Button>
-                </div>
-                </div>
+                  <AiSummarizer book={book} />
 
-                <div className="prose dark:prose-invert max-w-none">
-                <h2 className="font-headline text-2xl font-semibold">Description</h2>
-                <p>{book.description}</p>
-                </div>
-
+                  <Remarks bookId={book.id} />
+              </div>
             </div>
-            </div>
-            <Remarks bookId={book.id} />
         </div>
       </>
   );
