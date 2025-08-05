@@ -25,7 +25,7 @@ export default function LibraryPage() {
     const { categories } = useCategories();
     
     const featuredBooks = useMemo(() => books.slice(0, 10), [books]);
-    const academicCategories = useMemo(() => ['All', ...categories.filter(c => c !== 'Finance' && c !== 'Motivation')], [categories]);
+    const academicCategories = useMemo(() => ['All', ...categories.filter(c => c !== 'Finance' && c !== 'Motivation' && c !== 'All')], [categories]);
     const displayYears = useMemo(() => ['All', ...years], []);
 
     const [selectedCategory, setSelectedCategory] = useState('All');
