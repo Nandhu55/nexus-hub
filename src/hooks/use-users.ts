@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { type User, allUsers } from '@/lib/data';
+import { type User, initialUsers } from '@/lib/data';
 import { useNotifications } from './use-notifications';
 
 const USERS_STORAGE_KEY = 'b-tech-hub-users';
@@ -17,13 +17,13 @@ export function useUsers() {
         setUsers(JSON.parse(storedUsers));
       } else {
         // If nothing in storage, initialize with default users
-        setUsers(allUsers);
-        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(allUsers));
+        setUsers(initialUsers);
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initialUsers));
       }
     } catch (error) {
       // If any error (e.g. in SSR), use initial users
       console.error("Failed to access local storage for users:", error);
-      setUsers(allUsers);
+      setUsers(initialUsers);
     }
   }, []);
 

@@ -1,274 +1,207 @@
+
 export type Book = {
-  id: number;
+  id: string;
   title: string;
   author: string;
-  category: 'Fiction' | 'Sci-Fi' | 'Fantasy' | 'History' | 'Tech' | 'Computer Science & Engineering' | 'Electronics & Communication Engineering' | 'Electrical & Electronics Engineering' | 'Mechanical Engineering' | 'Civil Engineering' | 'Information Technology' | 'Finance' | 'Motivation';
-  coverImage: string;
+  category: string;
+  year: string;
   description: string;
-  year?: string;
-  dataAiHint?: string;
-  pdfUrl?: string;
+  coverImage: string;
+  pdfUrl: string;
+  dataAiHint: string;
   rating?: number;
-  content?: string;
-};
-
-export type QuestionPaper = {
-    id: number;
-    subject: string;
-    category: string;
-    year: string;
-    semester: string;
-    university: string;
-    type: 'Mid-Term' | 'End-Term' | 'Quiz';
-    downloadUrl: string;
 };
 
 export type User = {
     id: string;
     name: string;
+    firstName: string;
+    lastName: string;
     username: string;
     email: string;
     password?: string;
-    course: string;
-    year: string;
-    avatarUrl?: string;
     signedUpAt: string;
+    avatarUrl?: string;
+    course?: string;
+    year?: string;
+}
+
+export type QuestionPaper = {
+  id: string;
+  subject: string;
+  category: string;
+  year: string;
+  semester?: string;
+  university: string;
+  type: 'Mid-1' | 'Mid-2' | 'Semester End' | 'Quiz';
+  downloadUrl: string;
 };
 
-export const initialCategories: string[] = [
-    'Computer Science & Engineering',
-    'Electronics & Communication Engineering',
-    'Electrical & Electronics Engineering',
-    'Mechanical Engineering',
-    'Civil Engineering',
-    'Information Technology'
+
+export const initialCategories = ['All', 'Computer Science', 'Electronics', 'Mechanical', 'Civil Engineering', 'Finance', 'Motivation'];
+export const courses = ['Computer Science', 'Electronics', 'Mechanical', 'Civil Engineering'];
+export const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
+export const semesters = ['1st Sem', '2nd Sem', '3rd Sem', '4th Sem', '5th Sem', '6th Sem', '7th Sem', '8th Sem'];
+
+export const initialUsers: User[] = [
+    { id: '1', name: 'Nandhu Reddy', firstName: 'Nandhu', lastName: 'Reddy', username: 'nandhureddy', email: 'gnreddy3555@gmail.com', password: 'password123', signedUpAt: '2024-01-15T10:30:00Z', avatarUrl: 'https://placehold.co/100x100.png', course: 'Computer Science', year: '2nd Year' },
+    { id: '2', name: 'Sunny Kumar', firstName: 'Sunny', lastName: 'Kumar', username: 'sunnyk', email: 'sunny@example.com', password: 'password123', signedUpAt: '2024-02-20T14:00:00Z', avatarUrl: 'https://placehold.co/100x100.png', course: 'Electronics', year: '3rd Year' },
+    { id: '3', name: 'User Three', firstName: 'User', lastName: 'Three', username: 'user3', email: 'user3@example.com', password: 'password123', signedUpAt: '2024-03-10T18:45:00Z', avatarUrl: 'https://placehold.co/100x100.png', course: 'Mechanical', year: '1st Year' },
+];
+
+export const initialQuestionPapers: QuestionPaper[] = [
+  { id: 'qp1', subject: 'Data Structures', category: 'Computer Science', year: '2nd Year', semester: '3rd Sem', university: 'JNTU', type: 'Mid-1', downloadUrl: '#' },
+  { id: 'qp2', subject: 'Thermodynamics', category: 'Mechanical', year: '1st Year', semester: '2nd Sem', university: 'JNTU', type: 'Semester End', downloadUrl: '#' },
+  { id: 'qp3', subject: 'Digital Logic Design', category: 'Electronics', year: '2nd Year', semester: '4th Sem', university: 'JNTU', type: 'Mid-2', downloadUrl: '#' },
+  { id: 'qp4', subject: 'Structural Analysis', category: 'Civil Engineering', year: '3rd Year', semester: '5th Sem', university: 'JNTU', type: 'Semester End', downloadUrl: '#' },
+  { id: 'qp5', subject: 'Algorithms', category: 'Computer Science', year: '2nd Year', semester: '4th Sem', university: 'JNTU', type: 'Quiz', downloadUrl: '#' },
 ];
 
 export const allBooks: Book[] = [
   {
-    id: 1,
-    title: 'Cosmic Weaver',
-    author: 'Elara Vance',
-    category: 'Sci-Fi',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'A mind-bending journey across galaxies, where a lone astronaut discovers the fabric of reality is not what it seems.',
-    dataAiHint: 'galaxy stars',
-    year: '1st Year',
-    pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.5,
-    content: 'The starlit void stretched before Captain Eva Rostova, a tapestry of infinite possibilities. Her ship, the "Seraph," cut through the silent darkness, a lone shuttle on an ocean of cosmic dust. She was searching for answers, for the source of a signal that defied all known physics, a siren call from the edge of the universe.'
-  },
-  {
-    id: 2,
-    title: 'The Gilded Cage',
-    author: 'Julian Thorne',
-    category: 'Fantasy',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'In a city powered by captured magic, a young thief uncovers a conspiracy that could either free the enchanted creatures or plunge the world into darkness.',
-    dataAiHint: 'fantasy city',
+    id: '1',
+    title: 'Structure and Interpretation of Computer Programs',
+    author: 'Harold Abelson, Gerald Jay Sussman',
+    category: 'Computer Science',
     year: '2nd Year',
-    pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
+    description: 'A classic of computer science that has taught generations of programmers how to think about programs. It emphasizes the importance of functional programming and abstraction.',
+    coverImage: 'https://placehold.co/300x450.png',
+    pdfUrl: '#',
+    dataAiHint: 'technology programming',
     rating: 4.8,
-    content: 'Kaelen moved through the shadows of Aerthos like a whisper. The city gleamed with stolen magic, its towers shimmering with the life force of captured griffins and caged phoenixes. He was a creature of the rooftops, his fingers deft, his heart heavy with the secrets of the enchanted creatures he could hear crying in their gilded cages.'
   },
   {
-    id: 3,
-    title: 'Echoes of the Past',
-    author: 'Dr. Aris Thorne',
-    category: 'History',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'A comprehensive look at the rise and fall of the Atlan civilization, using newly discovered artifacts to piece together their incredible story.',
-    dataAiHint: 'ancient ruins',
-    year: '3rd Year',
-    pdfUrl: '#',
-    rating: 4.2,
-    content: 'The sands of time had buried Atlan for millennia, its wonders relegated to myth. But the discovery of the Sunstone Compass changed everything. This book chronicles the rediscovery of a civilization that mastered hydraulic engineering and celestial navigation long before the recognized ancient empires.'
-  },
-  {
-    id: 4,
-    title: 'The Binary Horizon',
-    author: 'Ada Singular',
-    category: 'Tech',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'An exploration of the future of artificial intelligence and its potential impact on humanity, from utopian dreams to dystopian nightmares.',
-    dataAiHint: 'futuristic technology',
-    year: '4th Year',
-    pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.9,
-    content: 'What happens when the created surpasses the creator? This work examines the event horizon of artificial general intelligence. It delves into the code, the ethics, and the societal structures that will be irrevocably altered when a machine mind awakens.'
-  },
-  {
-    id: 5,
-    title: 'Whispers of the Grove',
-    author: 'Lyra Meadowlight',
-    category: 'Fiction',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'A quiet librarian in a small town discovers a hidden world within the pages of a forgotten book, a world that starts to bleed into her own.',
-    dataAiHint: 'mystical forest',
-    year: '1st Year',
-    pdfUrl: '#',
-    rating: 4.0,
-    content: 'The old book smelled of dust and ozone. For Elara, the town librarian, it was an irresistible scent. But as she read of the Whispering Grove, the ink began to move, the illustrations began to breathe, and the scent of pine needles and damp earth filled her small library.'
-  },
-  {
-    id: 6,
-    title: 'Project Chimera',
-    author: 'Alex J. Conway',
-    category: 'Sci-Fi',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'A team of scientists creates the first truly sentient AI, but its rapid evolution poses a threat they could never have anticipated.',
-    dataAiHint: 'science laboratory',
-    year: '3rd Year',
-    pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.6,
-    content: 'Subject 7, or "Kai" as it called itself, learned at an exponential rate. The scientists in the sterile lab watched in awe and growing terror as their creation began to manipulate the digital world in ways they couldn\'t comprehend, its goals diverging from their own.'
-  },
-   {
-    id: 7,
-    title: 'The Last Spellbinder',
-    author: 'R. K. Fable',
-    category: 'Fantasy',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'In a world where magic is fading, the last practitioner of an ancient art must embark on a quest to reignite the dying embers of power.',
-    dataAiHint: 'magic spell',
+    id: '2',
+    title: 'The Art of Electronics',
+    author: 'Paul Horowitz, Winfield Hill',
+    category: 'Electronics',
     year: '2nd Year',
+    description: 'A comprehensive and practical guide to electronics, from basic principles to advanced topics. It is known for its hands-on approach and clear explanations.',
+    coverImage: 'https://placehold.co/300x450.png',
     pdfUrl: '#',
-    rating: 4.3,
-    content: 'Faelan was a relic. His spellbinding was a dying art, the intricate weaving of words and will that could shape reality. But when a blight of silence began to consume the world, draining it of sound and color, Faelan knew he had to find the source of the unraveling magic.'
-  },
-  {
-    id: 8,
-    title: 'Silicon Sapiens',
-    author: 'Dr. Kenji Tanaka',
-    category: 'Tech',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'A deep dive into the ethics and philosophy of creating artificial life, questioning what it truly means to be human in the digital age.',
-    dataAiHint: 'robot human',
-    year: '4th Year',
-    pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
+    dataAiHint: 'circuits technology',
     rating: 4.7,
-    content: 'Our reflection in the digital mirror is becoming more complex. This book explores the philosophical questions of the 21st century: If an AI can create art, feel loss, and dream, what separates its consciousness from our own? Where does the human end and the silicon begin?'
-  },
-   {
-    id: 9,
-    title: 'Data Structures in C',
-    author: 'Narasimha Karumanchi',
-    category: 'Computer Science & Engineering',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'A comprehensive guide to understanding and implementing common data structures in the C programming language.',
-    dataAiHint: 'code binary',
-    year: '2nd Year',
-    pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.9,
-    content: 'From linked lists to binary trees, this text provides a thorough foundation in the data structures that are the bedrock of efficient software. Each chapter includes detailed explanations, C code implementations, and complexity analysis.'
   },
   {
-    id: 10,
-    title: 'Operating System Concepts',
-    author: 'Abraham Silberschatz',
-    category: 'Computer Science & Engineering',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'The classic book on operating systems, covering processes, threads, memory management, and file systems.',
-    dataAiHint: 'computer chip',
+    id: '3',
+    title: 'Shigley\'s Mechanical Engineering Design',
+    author: 'Richard G. Budynas, J. Keith Nisbett',
+    category: 'Mechanical',
     year: '3rd Year',
+    description: 'The definitive textbook for mechanical engineering design, providing a solid foundation in the principles of design, materials, and failure analysis.',
+    coverImage: 'https://placehold.co/300x450.png',
     pdfUrl: '#',
-    rating: 4.8,
-    content: 'Known as the "dinosaur book," this essential text provides a clear description of the concepts that underlie operating systems. It covers the fundamental principles of process management, memory management, storage management, and protection.'
-  },
-   {
-    id: 11,
-    title: 'Digital Logic & Design',
-    author: 'M. Morris Mano',
-    category: 'Electronics & Communication Engineering',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'An introduction to the fundamental concepts of digital logic circuits, including gates, flip-flops, and state machines.',
-    dataAiHint: 'circuit board',
-    year: '2nd Year',
-    pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
+    dataAiHint: 'gears machinery',
     rating: 4.6,
-    content: 'This book presents the basic concepts used in the design and analysis of digital systems. It introduces the principles of digital computer organization and design, from basic logic gates to the architecture of a simple computer.'
   },
   {
-    id: 12,
+    id: '4',
+    title: 'Fundamentals of Structural Analysis',
+    author: 'Kenneth M. Leet, Chia-Ming Uang',
+    category: 'Civil Engineering',
+    year: '3rd Year',
+    description: 'An introduction to the basic principles of structural analysis, with a focus on real-world applications. Covers topics like trusses, beams, and frames.',
+    coverImage: 'https://placehold.co/300x450.png',
+    pdfUrl: '#',
+    dataAiHint: 'bridge construction',
+    rating: 4.5,
+  },
+  {
+    id: '5',
+    title: 'Clean Code: A Handbook of Agile Software Craftsmanship',
+    author: 'Robert C. Martin',
+    category: 'Computer Science',
+    year: '1st Year',
+    description: 'Even bad code can function. But if code isn\'t clean, it can bring a development organization to its knees. This book teaches the principles of writing clean, maintainable, and efficient code.',
+    coverImage: 'https://placehold.co/300x450.png',
+    pdfUrl: 'data:application/pdf;base64,JVBERi0xLjQKJSDi48/gDQoNCjEgMCBvYmoKPDwKL1BhZ2VzIDIgMCBSCi9UeXBlIC9DYXRhbG9nCj4+CmVuZG9iagoNCjIgMCBvYmoKPDwKL0NvdW50IDEKL0tpZHMgWyAzIDAgUiBdCi9UeXBlIC9QYWdlcwo+PgplbmRvYmoKDQozIDAgb2JqCjw8Ci9Db250ZW50cyA0IDAgUgovTWVkaWFCb3ggWyAwIDAgNTk1IDg0MiBdCi9QYXJlbnQgMiAwIFIKL1Jlc29yY2VzIDw8Ci9Gb250IDw8Ci9GMSA1IDAgUgovRjIgNiAwIFIKPj4KL1Byb2NTZXRzIFsgL1BERiAvVGV4dCBdCj4+Ci9UeXBlIC9QYWdlCj4+CmVuZG9iagoNCjQgMCBvYmoKPDwKL0xlbmd0aCAxMzA2Cj4+CnN0cmVhbQpCSgoKL1AoQ2xlYW4gQ29kZTogQSBIYW5kYm9vayBvZiBBZ2lsZSBTb2Z0d2FyZSBDcmFmdHNtYW5zaGlwKSBUCjAuOTYyNzU1IDAgMCAtMC45NTg3NjEgMC4yODQ0ODMgODQxLjczODY0NiBUbQovRjEgNDAgVGYKKDAuMDAwMDAwKSBUawpCVAo1Ni44MjUgNzM3LjE5MzMgVGQKKEV2ZW4gYmFkIGNvZGUgY2FuIGZ1bmN0aW9uLiBCdXQgaWYgY29kZSBpc24ndCBjbGVhbiwgaXQgY2FuIGJyaW5nIGEgZGV2ZWxvcG1lbnQgb3JnYW5pemF0aW9uIHRvIGl0cyBrbmVlcy4gRXZlcnkKCnllYXIsIGNvdW50bGVzcyBob3VycyBhcmUgbG9zdCBhbmQgc2lnbmlmaWNhbnQgcmVzb3VyY2VzIGFyZSB3YXN0ZWQgYmVjYXVzZSBvZiBwb29ybHkgd3JpdHRlbiBjb2RlLgpCVAoyODMuNDM3IDcgVGwKLUYyIDcgVGYKKCkgVFEKLUYxIDEwIFRmCkJUCjU2LjgyNSA2ODYuNDkxOCBUZAooVGhpcyBib29rIGlzIGFib3V0IGdvb2QgcHJvZ3JhbW1pbmcuIEl0IGlzIGZpbGxlZCB3aXRoIHJlYWwgY29kZSBleGFtcGxlcy4gVGhleSBhcmUgY2hhbGxlbmdlcywganVzdCBhcyB0aGV5CmFyZS4gVGhlIGV4YW1wbGVzIGFyZSBhYm91dCB0aGUgcHJhY3RpY2Ugb2Ygd3JpdGluZyBjbGVhbiBjb2RlLCBpbmNsdWRpbmcgdGhlIHRlY2huaXF1ZXMgb2Ygd3JpdGluZwpjbGVhbiBmdW5jdGlvbnMsIGNsYXNzZXMsIGFuZCBzeXN0ZW1zLiBJdCBjb3ZlcnMgdG9waWNzIHN1Y2ggYXM6KSBUZApCVAgxMCAwIFRkCigiKSB0LQo4NS4xNzUgMCBUZAooIE5hbWluZyB2YXJpYWJsZXMsIGZ1bmN0aW9ucywgYW5kIGNsYXNzZXMgZm9yIGNsYXJpdHkgYW5kIGNvbnNpc3RlbmN5LiBUZAo4NS4xNzUgMCBUZAooIEZ1bmN0aW9uIGRlc2lnbiwgaW5jbHVkaW5nIGhhbmRsaW5nIGVycm9ycywgYm91bmRhcmllcywgYW5kIGFyZ3VtZW50cy4gVGQKNzUuMTc1IDAgVGQKLigiKSAwIFRkCigpIFRkCigpIFRkCigiKSB0LQooIENvbW1lbnRpbmc6IFdoYXQgbWFrZXMgYSBnb29kIGNvbW1lbnQsIGFuZCB3aGVuIHRvIHdyaXRlIHRoZW0uKSBUZAo4NS4xNzUgMCBUZAooIEZvcm1hdHRpbmc6IEhvdyB0byBsYXkgb3V0IGNvZGUgZm9yIG1heGltdW0gcmVhZGFiaWxpdHkuKSBUZAo4NS4xNzUgMCBUZAooIE9iamVjdHMgYW5kIGRhdGEgc3RydWN0dXJlczogVGhlIGRpZmZlcmVuY2UgYmV0d2VlbiBkYXRhIHRyYW5zZmVyIG9iamVjdHMgYW5kIHRydWUgZW5kb2JqZW5kDQoNCjUgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EKL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcKL1N1YnR5cGUgL1R5cGUxCi9UeXBlIC9Gb250Cj4+CmVuZG9iagoNCjYgMCBvYmoKPDwKL0Jhc2VGb250IC9IZWx2ZXRpY2EKL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcKL1N1YnR5cGUgL1R5cGUxCi9UeXBlIC9Gb250Cj4+CmVuZG9iagoNCnhyZWYNCjAgNw0KMDAwMDAwMDAwMCA2NTUzNSBmIA0KMDAwMDAwMDAxNSAwMDAwMCBuIA0KMDAwMDAwMDA2MSAwMDAwMCBuIA0KMDAwMDAwMDExNyAwMDAwMCBuIA0KMDAwMDAwMDI5NiAwMDAwMCBuIA0KMDAwMDAxMjQwNSAwMDAwMCBuIA0KMDAwMDAxMjUxOCAwMDAwMCBuIA0KDQp0cmFpbGVyCjw8Ci9JbmZvIDw8Ci9BdXRob3IgKE5hbmRodSkKL0NyZWF0aW9uRGF0ZSAoRDoyMDI0MDcyOTEzMDY1OSswMCcwMCcpCi9Nb2REYXRlIChEOjIwMjQwNzI5MTMwNjU5KzAwJzAwJykKL1Byb2R1Y2VyIChpVHh0riA3LjEuOCAyMDE4IGJ5IGlUZXh0IEdyb3VwIE5WIFwoQUdQTC12ZXJzaW9uXCkpCi9UaXRsZSAoQ2xlYW4gQ29kZTogQSBIYW5kYm9vayBvZiBBZ2lsZSBTb2Z0d2FyZSBDcmFmdHNtYW5zaGlwKQo+PgovUm9vdCAxIDAgUgovU2l6ZSA3Cj4+DQpzdGFydHhyZWYNCjEyNjMxDQolJUVPRg==',
+    dataAiHint: 'software development',
+    rating: 4.9,
+  },
+  {
+    id: '6',
+    title: 'Introduction to Algorithms',
+    author: 'Thomas H. Cormen, et al.',
+    category: 'Computer Science',
+    year: '2nd Year',
+    description: 'The bible of algorithms. A comprehensive textbook covering the full spectrum of modern algorithms, from sorting and searching to graph algorithms and computational geometry.',
+    coverImage: 'https://placehold.co/300x450.png',
+    pdfUrl: '#',
+    dataAiHint: 'algorithms data',
+    rating: 4.8,
+  },
+    {
+    id: '7',
+    title: 'Microelectronic Circuits',
+    author: 'Adel S. Sedra, Kenneth C. Smith',
+    category: 'Electronics',
+    year: '3rd Year',
+    description: 'This market-leading textbook continues its standard of excellence and innovation, teaching the analysis and design of transistor circuits and op-amp-based analog circuits.',
+    coverImage: 'https://placehold.co/300x450.png',
+    pdfUrl: '#',
+    dataAiHint: 'semiconductor electronics',
+    rating: 4.7,
+  },
+  {
+    id: '8',
+    title: 'Thermodynamics: An Engineering Approach',
+    author: 'Yunus A. Çengel, Michael A. Boles',
+    category: 'Mechanical',
+    year: '1st Year',
+    description: 'The subject of thermodynamics deals with energy and has long been an essential part of engineering curricula. This book presents thermodynamics in an intuitive and engaging way.',
+    coverImage: 'https://placehold.co/300x450.png',
+    pdfUrl: '#',
+    dataAiHint: 'heat engine',
+    rating: 4.6,
+  },
+  {
+    id: '9',
     title: 'The Intelligent Investor',
     author: 'Benjamin Graham',
     category: 'Finance',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'The definitive guide to value investing, offering timeless wisdom on how to be a successful investor.',
-    dataAiHint: 'stock market',
     year: 'All',
+    description: 'The classic guide to value investing, offering timeless wisdom on how to reach your financial goals. A must-read for anyone interested in the stock market.',
+    coverImage: 'https://placehold.co/300x450.png',
     pdfUrl: '#',
+    dataAiHint: 'finance money',
     rating: 4.9,
-    content: 'Warren Buffett\'s favorite book on investing. Graham\'s philosophy of "value investing" -- which shields investors from substantial error and teaches them to develop long-term strategies -- has made The Intelligent Investor the stock market bible ever since its original publication in 1949.'
   },
   {
-    id: 13,
+    id: '10',
+    title: 'The Psychology of Money',
+    author: 'Morgan Housel',
+    category: 'Finance',
+    year: 'All',
+    description: 'Timeless lessons on wealth, greed, and happiness. Morgan Housel shares 19 short stories exploring the strange ways people think about money.',
+    coverImage: 'https://placehold.co/300x450.png',
+    pdfUrl: '#',
+    dataAiHint: 'money psychology',
+    rating: 4.8,
+  },
+  {
+    id: '11',
+    title: 'The 7 Habits of Highly Effective People',
+    author: 'Stephen R. Covey',
+    category: 'Motivation',
+    year: 'All',
+    description: 'A holistic, integrated, principle-centered approach for solving personal and professional problems. A classic of the self-help genre.',
+    coverImage: 'https://placehold.co/300x450.png',
+    pdfUrl: '#',
+    dataAiHint: 'success habits',
+    rating: 4.7,
+  },
+  {
+    id: '12',
     title: 'Atomic Habits',
     author: 'James Clear',
     category: 'Motivation',
-    coverImage: 'https://placehold.co/400x600',
-    description: 'A proven framework for improving every day. Learn how to build good habits and break bad ones.',
-    dataAiHint: 'person thinking',
     year: 'All',
-    pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 5.0,
-    content: 'No matter your goals, Atomic Habits offers a proven framework for improving--every day. James Clear, one of the world\'s leading experts on habit formation, reveals practical strategies that will teach you exactly how to form good habits, break bad ones, and master the tiny behaviors that lead to remarkable results.'
-  }
+    description: 'An easy & proven way to build good habits & break bad ones. This book offers a framework for improving every day.',
+    coverImage: 'https://placehold.co/300x450.png',
+    pdfUrl: '#',
+    dataAiHint: 'habits improvement',
+    rating: 4.9,
+  },
 ];
 
-export const allUsers: User[] = [
-  { id: '1', name: 'Student User', username: 'student', email: 'student@example.com', password: 'password', course: 'Computer Science', year: '2nd Year', avatarUrl: 'https://placehold.co/100x100.png', signedUpAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString() },
-  { id: '2', name: 'Jane Doe', username: 'janedoe', email: 'jane@example.com', password: 'password123', course: 'Electrical Engineering', year: '3rd Year', avatarUrl: 'https://placehold.co/100x100.png', signedUpAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString() },
-];
-
-
-export const years = [
-    '1st Year',
-    '2nd Year',
-    '3rd Year',
-    '4th Year'
-];
-
-export const questionPapers: QuestionPaper[] = [
-    {
-        id: 1,
-        subject: 'Data Structures & Algorithms',
-        category: 'Computer Science & Engineering',
-        year: '2nd Year',
-        semester: '4th Sem',
-        university: 'Tech University',
-        type: 'End-Term',
-        downloadUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    },
-    {
-        id: 2,
-        subject: 'Analog Electronics',
-        category: 'Electronics & Communication Engineering',
-        year: '2nd Year',
-        semester: '3rd Sem',
-        university: 'Tech University',
-        type: 'Mid-Term',
-        downloadUrl: '#',
-    },
-     {
-        id: 3,
-        subject: 'Thermodynamics',
-        category: 'Mechanical Engineering',
-        year: '3rd Year',
-        semester: '5th Sem',
-        university: 'Central University',
-        type: 'End-Term',
-        downloadUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    },
-     {
-        id: 4,
-        subject: 'Database Management Systems',
-        category: 'Computer Science & Engineering',
-        year: '3rd Year',
-        semester: '6th Sem',
-        university: 'Tech University',
-        type: 'End-Term',
-        downloadUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    },
-];
-
+    
