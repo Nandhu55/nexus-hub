@@ -30,6 +30,7 @@ export type User = {
     course: string;
     year: string;
     avatarUrl?: string;
+    signedUpAt: string;
 };
 
 export const bookCategories: Book['category'][] = ['Fiction', 'Sci-Fi', 'Fantasy', 'History', 'Tech', 'Computer Science & Engineering', 'Electronics & Communication Engineering', 'Electrical & Electronics Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Information Technology', 'Finance', 'Motivation'];
