@@ -1,3 +1,5 @@
+'use client';
+
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { books } from '@/lib/data';
@@ -5,8 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { AiSummarizer } from '@/components/reader/AiSummarizer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BookRecommender } from '@/components/library/BookRecommender';
+import { useBooks } from '@/hooks/use-books';
 
 export default function ReaderPage({ params }: { params: { id: string } }) {
+  const { books } = useBooks();
   const book = books.find((b) => b.id === parseInt(params.id, 10));
 
   if (!book) {
