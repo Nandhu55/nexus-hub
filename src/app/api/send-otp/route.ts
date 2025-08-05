@@ -12,15 +12,16 @@ export async function POST(req: NextRequest) {
 
         // Generate a random OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+        const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // OTP expires in 10 minutes
 
         const supabase = createClient();
 
         // Store OTP in the database
         // NOTE: You need to create an 'otps' table in Supabase 
-        // with columns: id (uuid), email (text), otp (text), created_at (timestamp with timezone)
+        // with columns: id (uuid), email (text), otp (text), created_at (timestamptz), expires_at (timestamptz)
         const { error: dbError } = await supabase
             .from('otps')
-            .insert([{ email, otp }]);
+            .insert([{ email, otp, expires_at }]);
 
         if (dbError) {
             console.error('Supabase error:', dbError);
