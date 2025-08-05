@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn, transformGoogleDriveLink } from '@/lib/utils';
 import type { Book } from '@/lib/data';
 import Remarks from '@/components/features/remarks';
+import PdfViewer from './PdfViewer';
 
 interface BookDisplayProps {
   book: Book;
@@ -21,6 +22,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
   const [isReading, setIsReading] = useState(false);
 
   const hasPdf = book.pdfUrl && book.pdfUrl !== '#';
+  const readUrl = hasPdf ? transformGoogleDriveLink(book.pdfUrl, false) : '#';
 
   const handleShare = async () => {
     const fallbackCopyLink = () => {
@@ -72,14 +74,13 @@ export default function BookDisplay({ book }: BookDisplayProps) {
   }
 
   if (isReading) {
-    const readUrl = transformGoogleDriveLink(book.pdfUrl, false);
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col">
           <header className="flex items-center justify-between p-2 sm:p-4 border-b bg-card">
               <div className="flex items-center gap-4">
-                <Button variant="ghost" onClick={() => router.back()} className="hidden sm:inline-flex">
+                <Button variant="ghost" onClick={() => setIsReading(false)} className="hidden sm:inline-flex">
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to library
+                    Back to Details
                 </Button>
                  <div className="w-px h-8 bg-border mx-2 hidden sm:block" />
                 <div>
@@ -92,8 +93,8 @@ export default function BookDisplay({ book }: BookDisplayProps) {
                   <span className="sr-only">Close Reader</span>
               </Button>
           </header>
-          <div className="flex-1 overflow-auto">
-             <iframe src={readUrl} className="w-full h-full" title={book.title} />
+          <div className="flex-1 overflow-auto p-4">
+             <PdfViewer file={readUrl} />
           </div>
       </div>
     );

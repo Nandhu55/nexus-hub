@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, BookOpen, X } from 'lucide-react';
+import { Download, BookOpen, X, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -20,6 +20,7 @@ import { years } from '@/lib/data';
 import { Separator } from '@/components/ui/separator';
 import type { QuestionPaper } from '@/lib/data';
 import { transformGoogleDriveLink } from '@/lib/utils';
+import PdfViewer from '@/components/features/PdfViewer';
 
 export default function ExamPapersPage() {
   const { questionPapers } = useQuestionPapers();
@@ -67,17 +68,23 @@ export default function ExamPapersPage() {
     return (
        <div className="fixed inset-0 bg-background z-50 flex flex-col">
           <header className="flex items-center justify-between p-2 sm:p-4 border-b bg-card">
-              <div>
-                  <h1 className="font-bold text-lg line-clamp-1">{readingPaper.subject}</h1>
-                  <p className="text-sm text-muted-foreground">{readingPaper.category} - {readingPaper.year}</p>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => setReadingPaper(null)}>
+                    <ArrowLeft className="h-5 w-5" />
+                    <span className="sr-only">Back</span>
+                </Button>
+                <div>
+                    <h1 className="font-bold text-lg line-clamp-1">{readingPaper.subject}</h1>
+                    <p className="text-sm text-muted-foreground">{readingPaper.category} - {readingPaper.year}</p>
+                </div>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setReadingPaper(null)}>
                   <X className="h-5 w-5" />
                   <span className="sr-only">Close Reader</span>
               </Button>
           </header>
-          <div className="flex-1 overflow-auto">
-             <iframe src={readUrl} className="w-full h-full" title={readingPaper.subject} />
+          <div className="flex-1 overflow-auto p-4">
+             <PdfViewer file={readUrl} />
           </div>
       </div>
     )
