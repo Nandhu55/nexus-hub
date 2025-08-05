@@ -45,6 +45,7 @@ export default function SignupPage() {
       course: '',
       year: '',
   });
+  const supabase = createClient();
 
   useEffect(() => {
     setMounted(true);
@@ -75,18 +76,15 @@ export default function SignupPage() {
       return;
     }
 
-    const res = await fetch('/api/send-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email }),
+    const { error } = await supabase.functions.invoke('send-otp', {
+        body: { email: formData.email },
     });
 
-    if (res.ok) {
+    if (!error) {
         toast({ title: 'OTP Sent!', description: 'Check your email for the verification code.' });
         setStep(2);
     } else {
-        const data = await res.json();
-        toast({ title: 'Failed to Send OTP', description: data.error, variant: 'destructive' });
+        toast({ title: 'Failed to Send OTP', description: error.message, variant: 'destructive' });
     }
 
     setLoading(false);
@@ -96,20 +94,17 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
 
-    const otpRes = await fetch('/api/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, otp }),
+    const { error: otpError } = await supabase.functions.invoke('verify-otp', {
+        body: { email: formData.email, otp },
     });
 
-    if (!otpRes.ok) {
-        const data = await otpRes.json();
-        toast({ title: "OTP Verification Failed", description: data.error, variant: "destructive" });
+
+    if (otpError) {
+        toast({ title: "OTP Verification Failed", description: otpError.message, variant: "destructive" });
         setLoading(false);
         return;
     }
 
-    const supabase = createClient();
     const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -286,3 +281,5 @@ export default function SignupPage() {
     </div>
   );
 }
+
+    
