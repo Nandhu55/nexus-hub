@@ -12,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import { ThemeToggle } from '../common/theme-toggle';
 
 const menuItems = [
   { href: '/library', label: 'Library', icon: BookOpen },
@@ -47,7 +48,8 @@ export function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="flex-row items-center gap-2">
+         <ThemeToggle />
          <Link href="/" legacyBehavior passHref>
             <SidebarMenuButton tooltip={{children: 'Logout'}}>
                 <LogOut />

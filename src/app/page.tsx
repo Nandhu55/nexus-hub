@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { BookMarked, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/common/theme-toggle';
 
 export default function LandingPage() {
     const [mounted, setMounted] = useState(false);
@@ -26,7 +27,7 @@ export default function LandingPage() {
 
     return (
         <div className="flex min-h-screen w-full flex-col">
-            <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/80 backdrop-blur-sm">
+            <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
                 <div className="container flex h-16 items-center px-4">
                     <Link href="/" className="flex items-center gap-3 group">
                         <BookMarked className="h-8 w-8 text-primary group-hover:text-primary/80 transition-colors duration-300" />
@@ -34,7 +35,8 @@ export default function LandingPage() {
                             B-Tech Hub
                         </span>
                     </Link>
-                    <div className="ml-auto">
+                    <div className="ml-auto flex items-center gap-2">
+                         <ThemeToggle />
                         <Button asChild>
                             <Link href="/login">
                                 <span>Get Started</span>
