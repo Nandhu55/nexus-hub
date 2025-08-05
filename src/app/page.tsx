@@ -16,11 +16,8 @@ export default function LandingPage() {
         // Check if user is already logged in and redirect to dashboard
         if (typeof window !== 'undefined') {
             const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-            const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
             if (isLoggedIn) {
                 router.replace('/library');
-            } else if (isAdmin) {
-                router.replace('/admin/dashboard');
             }
         }
     }, [router]);

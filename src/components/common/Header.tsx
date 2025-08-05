@@ -41,12 +41,10 @@ function NotificationIcon({ type }: { type: Notification['type'] }) {
 }
 
 export function Header() {
-  const [isAdmin, setIsAdmin] = useState(false);
   const { notifications, clearNotifications, markAsRead } = useNotifications();
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);
 
   const updateUserFromSession = useCallback(() => {
-    setIsAdmin(sessionStorage.getItem('isAdmin') === 'true');
     const userJson = sessionStorage.getItem('currentUser');
     if (userJson) {
       try {
@@ -64,7 +62,7 @@ export function Header() {
     updateUserFromSession();
 
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'currentUser' || event.key === 'isLoggedIn' || event.key === 'isAdmin') {
+      if (event.key === 'currentUser' || event.key === 'isLoggedIn') {
         updateUserFromSession();
       }
     };
@@ -254,9 +252,9 @@ export function Header() {
                     <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{isAdmin ? 'Admin' : currentUser?.name || 'Student'}</p>
+                        <p className="text-sm font-medium leading-none">{currentUser?.name || 'Student'}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                            {isAdmin ? 'admin@btech-hub.com' : currentUser?.email || 'student@example.com'}
+                            {currentUser?.email || 'student@example.com'}
                         </p>
                         </div>
                     </DropdownMenuLabel>
@@ -267,14 +265,6 @@ export function Header() {
                             <span>Profile</span>
                         </Link>
                     </DropdownMenuItem>
-                    {isAdmin && (
-                        <DropdownMenuItem asChild>
-                        <Link href="/admin/dashboard">
-                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                            <span>Admin Dashboard</span>
-                        </Link>
-                        </DropdownMenuItem>
-                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild onClick={handleLogout}>
                         <Link href="/login">
