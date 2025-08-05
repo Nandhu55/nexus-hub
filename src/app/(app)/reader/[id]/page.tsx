@@ -1,9 +1,10 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { books, Book } from '@/lib/data';
+import { books } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 import { AiSummarizer } from '@/components/reader/AiSummarizer';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { BookRecommender } from '@/components/library/BookRecommender';
 
 export default function ReaderPage({ params }: { params: { id: string } }) {
   const book = books.find((b) => b.id === parseInt(params.id, 10));
@@ -23,13 +24,16 @@ export default function ReaderPage({ params }: { params: { id: string } }) {
                     alt={`Cover of ${book.title}`}
                     width={400}
                     height={600}
-                    data-ai-hint="book cover"
+                    data-ai-hint={book.dataAiHint || 'book cover'}
                     className="w-full"
                 />
             </div>
             <h1 className="text-3xl font-bold font-headline">{book.title}</h1>
             <p className="text-lg text-muted-foreground">{book.author}</p>
-            <Badge variant="outline">{book.category}</Badge>
+            <div className="flex flex-wrap gap-2">
+                <Badge variant="outline">{book.category}</Badge>
+                {book.year && <Badge variant="secondary">{book.year}</Badge>}
+            </div>
             <p className="text-sm">{book.description}</p>
           </div>
         </div>
@@ -48,6 +52,11 @@ export default function ReaderPage({ params }: { params: { id: string } }) {
                     ... End of preview ...
                 </p>
              </ScrollArea>
+          </div>
+
+          <div className="space-y-4">
+             <h2 className="text-2xl font-bold font-headline mb-4 border-b pb-2">Find Your Next Read</h2>
+             <BookRecommender />
           </div>
         </div>
       </div>

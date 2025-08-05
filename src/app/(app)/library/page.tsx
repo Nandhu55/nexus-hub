@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import BookCard from '@/components/library/BookCard';
+import { BookCard } from '@/components/library/BookCard';
 import { Terminal, Search } from 'lucide-react';
 import {
   Carousel,
@@ -15,7 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Book } from '@/lib/data';
 import { useBooks } from '@/hooks/use-books';
-import { years, bookCategories } from '@/lib/data';
+import { years, courses as bookCategories } from '@/lib/data';
+import { BookRecommender } from '@/components/library/BookRecommender';
 
 // This is now a CLIENT component that handles its own state for filtering.
 export default function LibraryPage() {
@@ -32,14 +33,13 @@ export default function LibraryPage() {
     const filteredBooks = useMemo(() => {
         return books.filter(book => {
             const categoryMatch = selectedCategory === 'All' || book.category === selectedCategory;
-            // The book data doesn't have a 'year' property, so we'll ignore yearMatch for now
-            // const yearMatch = selectedYear === 'All' || book.year === selectedYear;
+            const yearMatch = selectedYear === 'All' || book.year === selectedYear;
             const searchMatch = searchQuery.trim() === '' || 
                                 book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                 book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                 book.category.toLowerCase().includes(searchQuery.toLowerCase());
             
-            return categoryMatch && searchMatch;
+            return categoryMatch && yearMatch && searchMatch;
         });
     }, [books, selectedCategory, selectedYear, searchQuery]);
 
@@ -85,19 +85,23 @@ export default function LibraryPage() {
       <Separator className="my-6 bg-primary/20" />
       
       <div>
-            <div className="mb-6">
-                <h2 className="font-headline text-2xl sm:text-3xl font-bold tracking-tight text-primary">Full Library Access</h2>
-                <div className="mt-4 flex flex-col gap-4">
-                    <div className="relative rounded-lg bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-0.5">
-                        <div className="relative flex items-center bg-background rounded-[calc(0.5rem-2px)]">
-                            <Search className="absolute left-3 h-5 w-5 text-muted-foreground" />
-                            <Input
-                                placeholder="Search by title, author, or category..."
-                                className="pl-10 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
+            <div className="mb-6 space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div className="space-y-1">
+                        <h2 className="font-headline text-2xl sm:text-3xl font-bold tracking-tight text-primary">Full Library Access</h2>
+                        <p className="text-muted-foreground">Browse, search, and filter our entire collection.</p>
+                    </div>
+                    <BookRecommender />
+                </div>
+                <div className="flex flex-col gap-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by title, author, or category..."
+                            className="pl-10 w-full"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
                     </div>
                     <div className="flex items-baseline gap-2 flex-wrap">
                         <span className="text-sm font-medium text-muted-foreground w-full sm:w-20 shrink-0">Category:</span>
@@ -112,7 +116,6 @@ export default function LibraryPage() {
                             </Button>
                         ))}
                     </div>
-                    {/* The book data doesn't have a 'year' property, so this filter is disabled for now.
                     <div className="flex items-baseline gap-2 flex-wrap">
                         <span className="text-sm font-medium text-muted-foreground w-full sm:w-20 shrink-0">Year:</span>
                         {displayYears.map(year => (
@@ -126,7 +129,6 @@ export default function LibraryPage() {
                             </Button>
                         ))}
                     </div>
-                    */}
                 </div>
             </div>
 

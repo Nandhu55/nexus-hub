@@ -15,7 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Loader2, Wand2 } from 'lucide-react';
 import { recommendBooks, RecommendBooksInput } from '@/ai/flows/book-recommender';
-import { bookCategories, Book } from '@/lib/data';
+import { courses as bookCategories, Book } from '@/lib/data';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export function BookRecommender() {
