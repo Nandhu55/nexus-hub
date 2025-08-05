@@ -79,7 +79,7 @@ export default function SignupPage() {
         password: formData.password,
         options: {
             data: {
-                name: `${'\'\'\''}${formData.firstName} ${formData.lastName}${'\'\'\''}`,
+                name: `${formData.firstName} ${formData.lastName}`,
                 first_name: formData.firstName,
                 last_name: formData.lastName,
                 username: formData.username,
