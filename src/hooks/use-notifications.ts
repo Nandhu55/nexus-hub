@@ -1,95 +1,116 @@
+'use client';
+
 import { useState, useEffect, useCallback } from 'react';
 
-export type Notification = {
+export interface Notification {
   id: string;
-  type: 'welcome' | 'new_book' | 'security';
   title: string;
   description: string;
-  timestamp: string;
   read: boolean;
-};
+  timestamp: string;
+  type: 'welcome' | 'new_book' | 'security' | 'general';
+}
+
+const NOTIFICATIONS_STORAGE_KEY = 'b-tech-hub-notifications';
+const MAX_NOTIFICATIONS = 10;
 
 const initialNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'welcome',
-    title: 'Welcome to B-Tech Hub!',
-    description: 'We are excited to have you here. Explore our library and resources.',
-    timestamp: new Date().toISOString(),
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'new_book',
-    title: 'New Book Added: AI Ethics',
-    description: '"Silicon Sapiens" has been added to the Tech category.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-    read: false,
-  },
-   {
-    id: '3',
-    type: 'security',
-    title: 'Security Alert',
-    description: 'We have updated our privacy policy. Please review the changes.',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3 days ago
-    read: true,
-  },
+    {
+        id: '1',
+        title: 'Welcome to B-Tech Hub!',
+        description: 'Your account has been created successfully.',
+        read: true,
+        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+        type: 'welcome',
+    },
+     {
+        id: '2',
+        title: 'Security Alert',
+        description: 'Your password was changed successfully.',
+        read: true,
+        timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+        type: 'security',
+    },
+    {
+        id: '3',
+        title: 'New Book Added!',
+        description: '"Java Fundamentals" is now available in the library.',
+        read: true,
+        timestamp: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days ago
+        type: 'new_book',
+    }
 ];
 
-const NOTIFICATIONS_STORAGE_KEY = 'btech-hub-notifications';
 
-export const useNotifications = () => {
+export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    try {
-      const storedNotifications = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
-      if (storedNotifications) {
-        setNotifications(JSON.parse(storedNotifications));
-      } else {
-        setNotifications(initialNotifications);
-        localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(initialNotifications));
+    const fetchNotifications = () => {
+      try {
+        const storedNotifications = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
+        if (storedNotifications) {
+          setNotifications(JSON.parse(storedNotifications));
+        } else {
+            setNotifications(initialNotifications);
+            localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(initialNotifications));
+        }
+      } catch (error) {
+        console.error("Failed to access local storage for notifications:", error);
+        setNotifications([]);
       }
+    };
+    
+    fetchNotifications();
+
+    // Listen for storage changes to update notifications across tabs/windows
+    window.addEventListener('storage', fetchNotifications);
+    return () => {
+      window.removeEventListener('storage', fetchNotifications);
+    };
+
+  }, []);
+
+  const updateStoredNotifications = useCallback((updatedNotifications: Notification[]) => {
+    setNotifications(updatedNotifications);
+    try {
+      // This will trigger the 'storage' event for other tabs
+      localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(updatedNotifications));
+      // Manually trigger a storage event so the current tab also updates, e.g., the header.
+       window.dispatchEvent(
+            new StorageEvent('storage', {
+                key: NOTIFICATIONS_STORAGE_KEY,
+                newValue: JSON.stringify(updatedNotifications),
+            })
+        );
     } catch (error) {
-        console.error("Failed to access localStorage for notifications:", error);
-        setNotifications(initialNotifications);
+      console.error("Failed to save notifications to local storage:", error);
     }
   }, []);
 
-  const updateStoredNotifications = (newNotifications: Notification[]) => {
-      try {
-        localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(newNotifications));
-      } catch (error) {
-        console.error("Failed to save notifications to localStorage:", error);
-      }
-  }
-
-  const addNotification = useCallback((notif: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'read' | 'timestamp'>) => {
     const newNotification: Notification = {
-      ...notif,
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString(),
+      ...notification,
+      id: String(Date.now()),
       read: false,
+      timestamp: new Date().toISOString(),
     };
+    
     setNotifications(prev => {
-      const updated = [newNotification, ...prev];
-      updateStoredNotifications(updated);
-      return updated;
+        const updated = [newNotification, ...prev].slice(0, MAX_NOTIFICATIONS);
+        updateStoredNotifications(updated);
+        return updated;
     });
-  }, []);
+  }, [updateStoredNotifications]);
 
   const clearNotifications = useCallback(() => {
-    setNotifications([]);
     updateStoredNotifications([]);
-  }, []);
+  }, [updateStoredNotifications]);
 
   const markAsRead = useCallback(() => {
-    setNotifications(prev => {
-        const newNotifications = prev.map(n => ({ ...n, read: true }));
-        updateStoredNotifications(newNotifications);
-        return newNotifications;
-    });
-  }, []);
+    const updated = notifications.map(n => ({ ...n, read: true }));
+    updateStoredNotifications(updated);
+  }, [notifications, updateStoredNotifications]);
 
   return { notifications, addNotification, clearNotifications, markAsRead };
-};
+}
