@@ -62,7 +62,7 @@ export default function ExamPapersPage() {
   });
 
   const displayYears = ['All', ...years];
-  const displayCategories = ['All', ...categories.filter(c => c !== 'Finance' && c !== 'Motivation')];
+  const displayCategories = ['All', ...categories.filter(c => c !== 'Finance' && c !== 'Motivation' && c !== 'All')];
   
   if (readingPaper) {
     const readUrl = transformGoogleDriveLink(readingPaper.downloadUrl, false);
