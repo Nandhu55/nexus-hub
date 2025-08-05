@@ -26,6 +26,7 @@ export default function LoginPage() {
     if (typeof window !== 'undefined') {
       sessionStorage.removeItem('isLoggedIn');
       sessionStorage.removeItem('currentUser');
+      sessionStorage.removeItem('userToVerify');
     }
   }, []);
 
@@ -72,7 +73,15 @@ export default function LoginPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="student-password">Password</Label>
+                 <div className="flex items-center justify-between">
+                    <Label htmlFor="student-password">Password</Label>
+                    <Link
+                        href="/forgot-password"
+                        className="text-sm text-primary underline-offset-4 hover:underline"
+                    >
+                        Forgot Password?
+                    </Link>
+                </div>
                  <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input id="student-password" type="password" placeholder="••••••••" required className="pl-10" value={studentPassword} onChange={(e) => setStudentPassword(e.target.value)} />

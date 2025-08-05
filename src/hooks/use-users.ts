@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import { type User, initialUsers } from '@/lib/data';
 import { useNotifications } from './use-notifications';
+import { useToast } from './use-toast';
 
 const USERS_STORAGE_KEY = 'b-tech-hub-users';
 
 export function useUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const { addNotification } = useNotifications();
+  const { toast } = useToast();
 
   useEffect(() => {
     try {
@@ -36,15 +38,8 @@ export function useUsers() {
     }
   };
 
-  const addUser = (user: Omit<User, 'id' | 'avatarUrl' | 'signedUpAt' | 'name'> & { firstName: string, lastName: string }): User => {
-    const newUser: User = {
-      ...user,
-      id: String(Date.now()),
-      name: `${user.firstName} ${user.lastName}`,
-      signedUpAt: new Date().toISOString(),
-      avatarUrl: 'https://placehold.co/100x100.png',
-    }
-    const updatedUsers = [...users, newUser];
+  const addUser = (user: User): User => {
+    const updatedUsers = [...users, user];
     updateStoredUsers(updatedUsers);
 
     addNotification({
@@ -53,7 +48,7 @@ export function useUsers() {
         type: 'welcome'
     });
     
-    return newUser;
+    return user;
   };
 
   const deleteUser = (userId: string) => {
@@ -68,5 +63,25 @@ export function useUsers() {
     updateStoredUsers(updatedUsers);
   };
 
-  return { users, addUser, deleteUser, updateUser };
+  const updateUserPassword = (email: string, newPassword: string): boolean => {
+    const userExists = users.some(u => u.email === email);
+    if (!userExists) {
+        toast({
+            title: "User not found",
+            variant: "destructive"
+        })
+        return false;
+    }
+
+    const updatedUsers = users.map(user =>
+      user.email === email ? { ...user, password: newPassword } : user
+    );
+    updateStoredUsers(updatedUsers);
+    toast({
+        title: "Password updated successfully!"
+    })
+    return true;
+  }
+
+  return { users, addUser, deleteUser, updateUser, updateUserPassword };
 }

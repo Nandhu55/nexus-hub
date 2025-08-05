@@ -28,7 +28,7 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 export default function SignupPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { addUser } = useUsers();
+  const { users } = useUsers();
   const { toast } = useToast();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -67,7 +67,16 @@ export default function SignupPage() {
       return;
     }
 
-    const newUser = addUser({
+    if (users.some(user => user.email === email)) {
+        toast({
+            title: "Email Already Exists",
+            description: "An account with this email already exists. Please log in.",
+            variant: "destructive",
+        });
+        return;
+    }
+
+    const newUser = {
       firstName,
       lastName,
       username,
@@ -75,16 +84,17 @@ export default function SignupPage() {
       password,
       course,
       year,
-    });
+      id: String(Date.now()),
+      name: `${firstName} ${lastName}`,
+      signedUpAt: new Date().toISOString(),
+      avatarUrl: 'https://placehold.co/100x100.png',
+    };
 
     if (typeof window !== 'undefined') {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        sessionStorage.setItem('currentUser', JSON.stringify(newUser));
+        sessionStorage.setItem('userToVerify', JSON.stringify(newUser));
     }
 
-    // No toast here, as the useUsers hook now handles it.
-
-    router.push('/library');
+    router.push('/verify-email?type=signup');
   };
 
   return (
