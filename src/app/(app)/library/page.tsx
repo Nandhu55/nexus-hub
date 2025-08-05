@@ -15,15 +15,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Book } from '@/lib/data';
 import { useBooks } from '@/hooks/use-books';
-import { years, courses as bookCategories } from '@/lib/data';
+import { years } from '@/lib/data';
+import { useCategories } from '@/hooks/use-categories';
 import { BookRecommender } from '@/components/library/BookRecommender';
 
 // This is now a CLIENT component that handles its own state for filtering.
 export default function LibraryPage() {
     const { books } = useBooks();
+    const { categories } = useCategories();
     
     const featuredBooks = useMemo(() => books.slice(0, 10), [books]);
-    const academicCategories = useMemo(() => ['All', ...bookCategories.filter(c => c !== 'Finance' && c !== 'Motivation')], []);
+    const academicCategories = useMemo(() => categories.filter(c => c !== 'Finance' && c !== 'Motivation'), [categories]);
     const displayYears = useMemo(() => ['All', ...years], []);
 
     const [selectedCategory, setSelectedCategory] = useState('All');

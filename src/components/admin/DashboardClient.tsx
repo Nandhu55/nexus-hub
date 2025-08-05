@@ -22,7 +22,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import { useBooks } from '@/hooks/use-books';
-import { Book, courses as bookCategories, years } from '@/lib/data';
+import { Book, years } from '@/lib/data';
+import { useCategories } from '@/hooks/use-categories';
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export function DashboardClient() {
   const { books, addBook, deleteBook } = useBooks();
+  const { categories } = useCategories();
   const [isDialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
 
@@ -92,6 +94,8 @@ export function DashboardClient() {
         });
     }
   }
+  
+  const bookCategories = [...categories.filter(c => c !== 'All'), 'Finance', 'Motivation'];
 
   return (
     <>
@@ -127,7 +131,7 @@ export function DashboardClient() {
                                 <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                             <SelectContent>
-                                {[...bookCategories, 'Finance', 'Motivation'].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                {bookCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                             </SelectContent>
                         </Select>
                     </div>

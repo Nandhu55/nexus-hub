@@ -15,15 +15,18 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Loader2, Wand2 } from 'lucide-react';
 import { recommendBooks, RecommendBooksInput } from '@/ai/flows/book-recommender';
-import { courses as bookCategories, Book } from '@/lib/data';
+import { useCategories } from '@/hooks/use-categories';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export function BookRecommender() {
   const [open, setOpen] = useState(false);
+  const { categories } = useCategories();
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const bookCategories = categories.filter(c => c !== 'All');
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategories((prev) =>

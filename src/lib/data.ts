@@ -9,6 +9,7 @@ export type Book = {
   dataAiHint?: string;
   pdfUrl?: string;
   rating?: number;
+  content?: string;
 };
 
 export type QuestionPaper = {
@@ -34,7 +35,14 @@ export type User = {
     signedUpAt: string;
 };
 
-export const initialCategories: Book['category'][] = ['Fiction', 'Sci-Fi', 'Fantasy', 'History', 'Tech', 'Computer Science & Engineering', 'Electronics & Communication Engineering', 'Electrical & Electronics Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Information Technology'];
+export const initialCategories: string[] = [
+    'Computer Science & Engineering',
+    'Electronics & Communication Engineering',
+    'Electrical & Electronics Engineering',
+    'Mechanical Engineering',
+    'Civil Engineering',
+    'Information Technology'
+];
 
 export const allBooks: Book[] = [
   {
@@ -47,7 +55,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'galaxy stars',
     year: '1st Year',
     pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.5
+    rating: 4.5,
+    content: 'The starlit void stretched before Captain Eva Rostova, a tapestry of infinite possibilities. Her ship, the "Seraph," cut through the silent darkness, a lone shuttle on an ocean of cosmic dust. She was searching for answers, for the source of a signal that defied all known physics, a siren call from the edge of the universe.'
   },
   {
     id: 2,
@@ -59,7 +68,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'fantasy city',
     year: '2nd Year',
     pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.8
+    rating: 4.8,
+    content: 'Kaelen moved through the shadows of Aerthos like a whisper. The city gleamed with stolen magic, its towers shimmering with the life force of captured griffins and caged phoenixes. He was a creature of the rooftops, his fingers deft, his heart heavy with the secrets of the enchanted creatures he could hear crying in their gilded cages.'
   },
   {
     id: 3,
@@ -71,7 +81,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'ancient ruins',
     year: '3rd Year',
     pdfUrl: '#',
-    rating: 4.2
+    rating: 4.2,
+    content: 'The sands of time had buried Atlan for millennia, its wonders relegated to myth. But the discovery of the Sunstone Compass changed everything. This book chronicles the rediscovery of a civilization that mastered hydraulic engineering and celestial navigation long before the recognized ancient empires.'
   },
   {
     id: 4,
@@ -83,7 +94,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'futuristic technology',
     year: '4th Year',
     pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.9
+    rating: 4.9,
+    content: 'What happens when the created surpasses the creator? This work examines the event horizon of artificial general intelligence. It delves into the code, the ethics, and the societal structures that will be irrevocably altered when a machine mind awakens.'
   },
   {
     id: 5,
@@ -95,7 +107,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'mystical forest',
     year: '1st Year',
     pdfUrl: '#',
-    rating: 4.0
+    rating: 4.0,
+    content: 'The old book smelled of dust and ozone. For Elara, the town librarian, it was an irresistible scent. But as she read of the Whispering Grove, the ink began to move, the illustrations began to breathe, and the scent of pine needles and damp earth filled her small library.'
   },
   {
     id: 6,
@@ -107,7 +120,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'science laboratory',
     year: '3rd Year',
     pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.6
+    rating: 4.6,
+    content: 'Subject 7, or "Kai" as it called itself, learned at an exponential rate. The scientists in the sterile lab watched in awe and growing terror as their creation began to manipulate the digital world in ways they couldn\'t comprehend, its goals diverging from their own.'
   },
    {
     id: 7,
@@ -119,7 +133,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'magic spell',
     year: '2nd Year',
     pdfUrl: '#',
-    rating: 4.3
+    rating: 4.3,
+    content: 'Faelan was a relic. His spellbinding was a dying art, the intricate weaving of words and will that could shape reality. But when a blight of silence began to consume the world, draining it of sound and color, Faelan knew he had to find the source of the unraveling magic.'
   },
   {
     id: 8,
@@ -131,7 +146,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'robot human',
     year: '4th Year',
     pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.7
+    rating: 4.7,
+    content: 'Our reflection in the digital mirror is becoming more complex. This book explores the philosophical questions of the 21st century: If an AI can create art, feel loss, and dream, what separates its consciousness from our own? Where does the human end and the silicon begin?'
   },
    {
     id: 9,
@@ -143,7 +159,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'code binary',
     year: '2nd Year',
     pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.9
+    rating: 4.9,
+    content: 'From linked lists to binary trees, this text provides a thorough foundation in the data structures that are the bedrock of efficient software. Each chapter includes detailed explanations, C code implementations, and complexity analysis.'
   },
   {
     id: 10,
@@ -155,7 +172,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'computer chip',
     year: '3rd Year',
     pdfUrl: '#',
-    rating: 4.8
+    rating: 4.8,
+    content: 'Known as the "dinosaur book," this essential text provides a clear description of the concepts that underlie operating systems. It covers the fundamental principles of process management, memory management, storage management, and protection.'
   },
    {
     id: 11,
@@ -167,7 +185,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'circuit board',
     year: '2nd Year',
     pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 4.6
+    rating: 4.6,
+    content: 'This book presents the basic concepts used in the design and analysis of digital systems. It introduces the principles of digital computer organization and design, from basic logic gates to the architecture of a simple computer.'
   },
   {
     id: 12,
@@ -179,7 +198,8 @@ export const allBooks: Book[] = [
     dataAiHint: 'stock market',
     year: 'All',
     pdfUrl: '#',
-    rating: 4.9
+    rating: 4.9,
+    content: 'Warren Buffett\'s favorite book on investing. Graham\'s philosophy of "value investing" -- which shields investors from substantial error and teaches them to develop long-term strategies -- has made The Intelligent Investor the stock market bible ever since its original publication in 1949.'
   },
   {
     id: 13,
@@ -191,17 +211,9 @@ export const allBooks: Book[] = [
     dataAiHint: 'person thinking',
     year: 'All',
     pdfUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
-    rating: 5.0
+    rating: 5.0,
+    content: 'No matter your goals, Atomic Habits offers a proven framework for improving--every day. James Clear, one of the world\'s leading experts on habit formation, reveals practical strategies that will teach you exactly how to form good habits, break bad ones, and master the tiny behaviors that lead to remarkable results.'
   }
-];
-
-export const courses = [
-    'Computer Science & Engineering',
-    'Electronics & Communication Engineering',
-    'Electrical & Electronics Engineering',
-    'Mechanical Engineering',
-    'Civil Engineering',
-    'Information Technology'
 ];
 
 export const years = [

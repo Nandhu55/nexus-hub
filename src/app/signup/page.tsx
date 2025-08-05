@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useUsers } from '@/hooks/use-users';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { years, courses } from '@/lib/data';
+import { years, initialCategories } from '@/lib/data';
 import { Separator } from '@/components/ui/separator';
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -167,7 +167,7 @@ export default function SignupPage() {
                           <SelectValue placeholder="Select course" />
                       </SelectTrigger>
                       <SelectContent>
-                          {courses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                          {initialCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                       </SelectContent>
                   </Select>
                 </div>
