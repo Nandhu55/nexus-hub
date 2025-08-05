@@ -3,8 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Nexus Library',
-  description: 'A creative and imaginative e-library experience.',
+  title: 'B-Tech eBooks Hub',
+  description: 'A modern e-library for B-Tech students.',
 };
 
 export default function RootLayout({

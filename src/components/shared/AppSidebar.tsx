@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, LogOut, Settings, ShieldCheck, LayoutDashboard } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { BookOpen, LogOut, ShieldCheck } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -27,7 +26,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
             <BookOpen className="w-8 h-8 text-primary" />
-            <h1 className="text-xl font-bold font-headline">Nexus Library</h1>
+            <h1 className="text-xl font-bold font-headline">B-Tech Hub</h1>
         </div>
       </SidebarHeader>
       <SidebarContent>
