@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, LogOut, ShieldCheck } from 'lucide-react';
+import { BookOpen, LogOut, ShieldCheck, Compass } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +15,7 @@ import {
 
 const menuItems = [
   { href: '/library', label: 'Library', icon: BookOpen },
+  { href: '/career-guidance', label: 'Career Guidance', icon: Compass },
   { href: '/admin/dashboard', label: 'Admin', icon: ShieldCheck },
 ];
 
