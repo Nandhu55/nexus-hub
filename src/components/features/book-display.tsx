@@ -12,6 +12,7 @@ import type { Book } from '@/lib/data';
 import Remarks from '@/components/features/remarks';
 import PdfViewer from './PdfViewer';
 import { AiSummarizer } from '@/components/reader/AiSummarizer';
+import { Separator } from '../ui/separator';
 
 interface BookDisplayProps {
   book: Book;
@@ -102,48 +103,31 @@ export default function BookDisplay({ book }: BookDisplayProps) {
   }
   
   return (
-      <>
-        <div className="max-w-6xl mx-auto space-y-8 md:space-y-12">
-            <Button variant="ghost" onClick={() => router.back()} className="mb-4">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to library
-            </Button>
-            <div className="grid md:grid-cols-12 gap-8 md:gap-12">
-              <div className="md:col-span-4 lg:col-span-3">
-                  <div className="md:sticky md:top-24">
-                  <div className="relative aspect-[2/3] w-full max-w-xs mx-auto shadow-lg rounded-lg overflow-hidden">
-                      <Image
-                      src={book.coverImage}
-                      alt={`Cover of ${book.title}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      data-ai-hint={book.dataAiHint}
-                      />
-                  </div>
-                   <div className="mt-4 flex flex-col gap-2">
-                        <Button className="w-full" size="lg" onClick={handleRead} disabled={!hasPdf}>
-                            <BookOpen className="mr-2 h-5 w-5" />
-                            {hasPdf ? 'Read Now' : 'Reading not available'}
-                        </Button>
-                        <Button className="w-full" variant="secondary" onClick={handleDownload} disabled={!hasPdf}>
-                            <Download className="mr-2 h-5 w-5" />
-                            Download
-                        </Button>
-                        <Button className="w-full" variant="secondary" onClick={handleShare}>
-                            <Share2 className="mr-2 h-5 w-5" />
-                            Share
-                        </Button>
-                    </div>
-                  </div>
-              </div>
-              <div className="md:col-span-8 lg:col-span-9 space-y-8">
-                  <div className="space-y-2">
+    <div className="max-w-6xl mx-auto space-y-8 md:space-y-12">
+        <Button variant="ghost" onClick={() => router.back()} className="mb-4">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to library
+        </Button>
+        <div className="grid md:grid-cols-12 gap-8 md:gap-12">
+            <div className="md:col-span-4 lg:col-span-3">
+                <div className="relative aspect-[2/3] w-full max-w-xs mx-auto shadow-2xl rounded-lg overflow-hidden border-4 border-primary/20">
+                    <Image
+                    src={book.coverImage}
+                    alt={`Cover of ${book.title}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    data-ai-hint={book.dataAiHint}
+                    />
+                </div>
+            </div>
+            <div className="md:col-span-8 lg:col-span-9 space-y-6">
+                <div className="space-y-3">
                     <Badge variant="secondary">{book.category}</Badge>
-                    <h1 className="font-headline text-3xl md:text-5xl font-bold mt-2">{book.title}</h1>
-                    <p className="mt-2 text-lg md:text-xl text-muted-foreground">by {book.author}</p>
+                    <h1 className="font-headline text-3xl md:text-5xl font-bold">{book.title}</h1>
+                    <p className="text-lg md:text-xl text-muted-foreground">by {book.author}</p>
                     
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-4">
                         <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
                             <Star
@@ -159,19 +143,37 @@ export default function BookDisplay({ book }: BookDisplayProps) {
                         </div>
                         <span className="text-muted-foreground font-medium">{book.rating?.toFixed(1) || 'N/A'}</span>
                     </div>
-                  </div>
-                  
-                  <div className="prose dark:prose-invert max-w-none">
-                    <h2 className="font-headline text-2xl font-semibold">Description</h2>
-                    <p>{book.description}</p>
-                  </div>
+                </div>
 
-                  <AiSummarizer book={book} />
+                <div className="flex flex-wrap items-center gap-3">
+                    <Button size="lg" onClick={handleRead} disabled={!hasPdf}>
+                        <BookOpen className="mr-2 h-5 w-5" />
+                        {hasPdf ? 'Read Now' : 'Reading not available'}
+                    </Button>
+                    <Button variant="outline" onClick={handleDownload} disabled={!hasPdf}>
+                        <Download className="mr-2 h-5 w-5" />
+                        Download
+                    </Button>
+                    <Button variant="outline" onClick={handleShare}>
+                        <Share2 className="mr-2 h-5 w-5" />
+                        Share
+                    </Button>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-8">
+                    <div className="prose dark:prose-invert max-w-none">
+                        <h2 className="font-headline text-2xl font-semibold">Description</h2>
+                        <p>{book.description}</p>
+                    </div>
 
-                  <Remarks bookId={parseInt(book.id)} />
-              </div>
+                    <AiSummarizer book={book} />
+
+                    <Remarks bookId={book.id as unknown as number} />
+                </div>
             </div>
         </div>
-      </>
+    </div>
   );
 }
