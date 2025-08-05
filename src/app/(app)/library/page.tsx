@@ -17,7 +17,6 @@ import type { Book } from '@/lib/data';
 import { useBooks } from '@/hooks/use-books';
 import { years } from '@/lib/data';
 import { useCategories } from '@/hooks/use-categories';
-import { BookRecommender } from '@/components/library/BookRecommender';
 
 // This is now a CLIENT component that handles its own state for filtering.
 export default function LibraryPage() {
@@ -96,7 +95,6 @@ export default function LibraryPage() {
                         <h2 className="font-headline text-2xl sm:text-3xl font-bold tracking-tight text-primary">Full Library Access</h2>
                         <p className="text-muted-foreground">Browse, search, and filter our entire collection.</p>
                     </div>
-                    <BookRecommender />
                 </div>
                 <div className="flex flex-col gap-4">
                     <div className="relative">
