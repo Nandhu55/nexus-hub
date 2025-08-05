@@ -10,19 +10,10 @@ import { createClient } from '@/lib/supabase/client';
 
 export default function LandingPage() {
     const [mounted, setMounted] = useState(false);
-    const router = useRouter();
 
     useEffect(() => {
         setMounted(true);
-        const checkUser = async () => {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                router.replace('/library');
-            }
-        };
-        checkUser();
-    }, [router]);
+    }, []);
 
     return (
         <div className="flex min-h-screen w-full flex-col">

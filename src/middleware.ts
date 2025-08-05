@@ -17,38 +17,50 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
+          try {
+            request.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+            response = NextResponse.next({
+              request: {
+                headers: request.headers,
+              },
+            })
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+          } catch (error) {
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
         },
         remove(name: string, options) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
+          try {
+            request.cookies.set({
+              name,
+              value: '',
+              ...options,
+            })
+            response = NextResponse.next({
+              request: {
+                headers: request.headers,
+              },
+            })
+            response.cookies.set({
+              name,
+              value: '',
+              ...options,
+            })
+          } catch (error) {
+            // The `delete` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
         },
       },
     }
@@ -60,17 +72,23 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // Redirect to login if not authenticated and trying to access protected routes
-  if (!user && (pathname.startsWith('/library') || pathname.startsWith('/profile'))) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  const protectedRoutes = ['/library', '/profile', '/exam-papers', '/career-guidance', '/other-books', '/contact', '/book'];
+  const authRoutes = ['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email'];
+
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  const isAuthRoute = authRoutes.includes(pathname);
+
+  // If user is not logged in and trying to access a protected route, redirect to login
+  if (!user && isProtectedRoute) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Redirect to library if authenticated and trying to access auth pages
-  if (user && (pathname === '/login' || pathname === '/signup' || pathname === '/forgot-password')) {
-     return NextResponse.redirect(new URL('/library', request.url))
+  // If user is logged in and trying to access an auth route or the landing page, redirect to library
+  if (user && (isAuthRoute || pathname === '/')) {
+    return NextResponse.redirect(new URL('/library', request.url));
   }
 
-  return response
+  return response;
 }
 
 export const config = {
