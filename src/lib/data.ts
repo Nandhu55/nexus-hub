@@ -21,6 +21,17 @@ export type QuestionPaper = {
     downloadUrl: string;
 };
 
+export type User = {
+    id: number;
+    name: string;
+    username: string;
+    email: string;
+    password?: string;
+    course: string;
+    year: string;
+    avatarUrl?: string;
+};
+
 export const bookCategories: Book['category'][] = ['Fiction', 'Sci-Fi', 'Fantasy', 'History', 'Tech', 'Computer Science & Engineering', 'Electronics & Communication Engineering', 'Electrical & Electronics Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Information Technology'];
 
 export const books: Book[] = [

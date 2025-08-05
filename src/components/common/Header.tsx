@@ -1,22 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import {
-  BookMarked,
-  Menu,
-  BookOpen,
-  FileText,
-  Compass,
-  ShieldCheck,
-  User,
-  LogOut,
-  X,
-} from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { formatDistanceToNow } from 'date-fns';
+import { BookMarked, LogOut, User, LayoutDashboard, Terminal, Home, Bell, Trash2, FileText, Shapes, Briefcase, BookHeart, UserPlus, BookCheck, Shield, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/common/theme-toggle';
-import { useIsMobile } from '@/hooks/use-mobile';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,150 +12,268 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal
 } from '@/components/ui/dropdown-menu';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
-import type { User as UserType } from '@/hooks/use-users';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useNotifications } from '@/hooks/use-notifications';
+import { Badge } from '@/components/ui/badge';
+import type { User as UserType } from '@/lib/data';
+import type { Notification } from '@/hooks/use-notifications';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ThemeToggle } from './theme-toggle';
 
-const navItems = [
-  { href: '/library', label: 'Library', icon: BookOpen },
-  { href: '/exam-papers', label: 'Exam Papers', icon: FileText },
-  { href: '/career-guidance', label: 'Career Guidance', icon: Compass },
-];
-
-const adminNavItems = [
-    { href: '/admin/dashboard', label: 'Admin', icon: ShieldCheck },
-];
+function NotificationIcon({ type }: { type: Notification['type'] }) {
+    const iconProps = { className: "h-5 w-5" };
+    switch (type) {
+        case 'welcome':
+            return <UserPlus {...iconProps} />;
+        case 'new_book':
+            return <BookCheck {...iconProps} />;
+        case 'security':
+             return <Shield {...iconProps} />;
+        default:
+            return <Bell {...iconProps} />;
+    }
+}
 
 export function Header() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const isMobile = useIsMobile();
-  const [isSheetOpen, setSheetOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { notifications, clearNotifications, markAsRead } = useNotifications();
+  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const userJson = sessionStorage.getItem('currentUser');
-      if (userJson) {
+  const updateUserFromSession = useCallback(() => {
+    setIsAdmin(sessionStorage.getItem('isAdmin') === 'true');
+    const userJson = sessionStorage.getItem('currentUser');
+    if (userJson) {
+      try {
         setCurrentUser(JSON.parse(userJson));
+      } catch (e) {
+        console.error("Could not parse user JSON from session storage", e);
+        setCurrentUser(null);
       }
-      const adminStatus = sessionStorage.getItem('isAdmin') === 'true';
-      setIsAdmin(adminStatus);
+    } else {
+      setCurrentUser(null);
     }
   }, []);
-  
+
+  useEffect(() => {
+    updateUserFromSession();
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'currentUser' || event.key === 'isLoggedIn' || event.key === 'isAdmin') {
+        updateUserFromSession();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [updateUserFromSession]);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const handleOpenChange = (open: boolean) => {
+    if (open && unreadCount > 0) {
+      markAsRead();
+    }
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    try {
+      const date = new Date(timestamp);
+      if (isNaN(date.getTime())) {
+        return "a moment ago";
+      }
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (e) {
+      return "a moment ago";
+    }
+  }
+
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
         sessionStorage.clear();
     }
-    router.push('/login');
+    // No need to router.push, the layout effect will handle it.
   }
 
-  const allNavItems = isAdmin ? [...navItems, ...adminNavItems] : navItems;
-
-  const NavLinks = ({ inSheet = false }: { inSheet?: boolean }) => (
-    <>
-      {allNavItems.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          onClick={() => setSheetOpen(false)}
-          className={cn(
-            'transition-colors hover:text-primary',
-            pathname.startsWith(item.href) ? 'text-primary font-semibold' : 'text-muted-foreground',
-            inSheet && 'flex items-center gap-3 rounded-lg px-3 py-2 text-lg'
-          )}
-        >
-          {inSheet && <item.icon className="h-5 w-5" />}
-          {item.label}
-        </Link>
-      ))}
-    </>
-  );
-
-  const UserMenu = () => {
-    if (!currentUser && !isAdmin) return null;
-    const displayName = isAdmin ? 'Admin' : currentUser?.name;
-    const displayEmail = isAdmin ? 'admin@btech-hub.com' : currentUser?.email;
-
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="secondary" size="icon" className="rounded-full">
-            <User className="h-5 w-5" />
-            <span className="sr-only">Toggle user menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>
-            <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{displayName}</p>
-                <p className="text-xs leading-none text-muted-foreground">{displayEmail}</p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
-  };
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/80 backdrop-blur-sm">
       <div className="container flex h-16 items-center px-4">
-        <Link href="/library" className="mr-6 flex items-center gap-3 group">
-          <BookMarked className="h-8 w-8 text-primary group-hover:text-primary/80 transition-colors duration-300" />
-          <span className="font-headline text-2xl font-bold text-foreground tracking-tighter group-hover:text-primary transition-colors duration-300">
-            B-Tech Hub
-          </span>
+        <Link href="/library" className="flex items-center gap-3 group">
+            <Terminal className="h-8 w-8 text-primary group-hover:text-primary/80 transition-colors duration-300" />
+            <span className="font-headline text-2xl font-bold text-foreground tracking-tighter group-hover:text-primary transition-colors duration-300">
+                B-Tech Hub
+            </span>
         </Link>
-
-        {isMobile ? (
-          <div className="ml-auto flex items-center gap-2">
-            <ThemeToggle />
-            <UserMenu />
-            <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu />
-                  <span className="sr-only">Open Menu</span>
+        
+        <div className="ml-auto flex items-center gap-2">
+            <nav className="hidden md:flex items-center gap-1">
+                <Button asChild variant="ghost">
+                    <Link href="/library">
+                        <Home className="mr-2 h-4 w-4" />
+                        <span>Home</span>
+                    </Link>
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="left">
-                <SheetHeader>
-                  <SheetTitle className="flex items-center gap-2">
-                    <BookMarked className="h-6 w-6 text-primary"/>
-                    <span>B-Tech Hub</span>
-                  </SheetTitle>
-                </SheetHeader>
-                <nav className="mt-8 grid gap-4">
-                  <NavLinks inSheet />
-                </nav>
-              </SheetContent>
-            </Sheet>
-          </div>
-        ) : (
-          <>
-            <nav className="hidden md:flex items-center gap-6 text-sm">
-              <NavLinks />
+                <Button asChild variant="ghost">
+                    <Link href="/exam-papers">
+                        <FileText className="mr-2 h-4 w-4" />
+                        <span>Exam Papers</span>
+                    </Link>
+                </Button>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost">
+                            <Shapes className="mr-2 h-4 w-4" />
+                            <span>Resources</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                        <Link href="/career-guidance">
+                            <Briefcase className="mr-2 h-4 w-4" />
+                            <span>Career Guidance</span>
+                        </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </nav>
-            <div className="ml-auto flex items-center gap-2">
-              <ThemeToggle />
-              <UserMenu />
+
+            <div className="flex items-center gap-1">
+                <div className="md:hidden">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <Menu className="h-5 w-5" />
+                                <span className="sr-only">Open menu</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                                <Link href="/library">
+                                    <Home className="mr-2 h-4 w-4" />
+                                    <span>Home</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href="/exam-papers">
+                                    <FileText className="mr-2 h-4 w-4" />
+                                    <span>Exam Papers</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                             <DropdownMenuLabel>Resources</DropdownMenuLabel>
+                            <DropdownMenuItem asChild>
+                            <Link href="/career-guidance">
+                                <Briefcase className="mr-2 h-4 w-4" />
+                                <span>Career Guidance</span>
+                            </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+
+                <ThemeToggle />
+
+                <DropdownMenu onOpenChange={handleOpenChange}>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-foreground hover:text-primary hover:bg-primary/10 relative">
+                            <Bell className="h-5 w-5" />
+                            {unreadCount > 0 && (
+                                <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">{unreadCount}</Badge>
+                            )}
+                            <span className="sr-only">Notifications</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-80 md:w-96" align="end">
+                        <DropdownMenuLabel className="flex justify-between items-center">
+                            <span className="font-semibold">Notifications</span>
+                            {notifications.length > 0 && (
+                                <Button variant="ghost" size="sm" onClick={clearNotifications} className="text-xs text-muted-foreground h-auto p-1">
+                                    <Trash2 className="mr-1 h-3 w-3" />
+                                    Clear all
+                                </Button>
+                            )}
+                        </DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <ScrollArea className="h-[300px]">
+                            <DropdownMenuGroup>
+                            {notifications.length === 0 ? (
+                                <p className="text-center text-sm text-muted-foreground py-10">No new notifications</p>
+                            ) : (
+                                notifications.map((n) => (
+                                    <DropdownMenuItem key={n.id} className="flex items-start gap-3 p-3 whitespace-normal cursor-default" onSelect={(e) => e.preventDefault()}>
+                                        <div className="rounded-full bg-primary/10 text-primary p-2">
+                                            <NotificationIcon type={n.type} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="font-semibold">{n.title}</p>
+
+                                            <p className="text-sm text-muted-foreground">{n.description}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                {formatTimestamp(n.timestamp)}
+                                            </p>
+                                        </div>
+                                    </DropdownMenuItem>
+                                ))
+                            )}
+                            </DropdownMenuGroup>
+                        </ScrollArea>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                        <Avatar className="h-10 w-10 border-2 border-primary/50 hover:border-primary transition-colors duration-300">
+                        <AvatarImage src={currentUser?.avatarUrl} alt={currentUser?.name} data-ai-hint="person portrait" />
+                        <AvatarFallback>
+                            <User />
+                        </AvatarFallback>
+                        </Avatar>
+                    </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{isAdmin ? 'Admin' : currentUser?.name || 'Student'}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                            {isAdmin ? 'admin@btech-hub.com' : currentUser?.email || 'student@example.com'}
+                        </p>
+                        </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                        <Link href="/profile">
+                            <User className="mr-2 h-4 w-4" />
+                            <span>Profile</span>
+                        </Link>
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                        <DropdownMenuItem asChild>
+                        <Link href="/admin/dashboard">
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Admin Dashboard</span>
+                        </Link>
+                        </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild onClick={handleLogout}>
+                        <Link href="/login">
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
+                        </Link>
+                    </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
-          </>
-        )}
+        </div>
       </div>
     </header>
   );
