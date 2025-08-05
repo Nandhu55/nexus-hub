@@ -1,15 +1,12 @@
-import { AppSidebar } from '@/components/shared/AppSidebar';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
+'use client';
+
+import { Header } from '@/components/common/Header';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="bg-background !p-0">
-        <div className="p-4 sm:p-6 lg:p-8">
-            {children}
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="container py-6 sm:py-8">{children}</main>
+    </div>
   );
 }
