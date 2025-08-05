@@ -9,6 +9,11 @@ export async function POST(req: NextRequest) {
         if (!email) {
             return NextResponse.json({ error: 'Email is required' }, { status: 400 });
         }
+        
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            console.error('Email credentials are not set in environment variables.');
+            return NextResponse.json({ error: 'Email service is not configured.' }, { status: 500 });
+        }
 
         // Generate a random OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
