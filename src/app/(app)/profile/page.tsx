@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTheme } from 'next-themes';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -9,82 +9,84 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { User, Mail, Sun, Moon, Palette, Camera, BookCopy, CalendarDays, GraduationCap, LogOut, ArrowLeft } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import type { User as UserType } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import type { User as UserData } from '@/lib/data';
 
 export default function ProfilePage() {
   const { toast } = useToast();
   const { setTheme, theme } = useTheme();
-  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const supabase = createClient();
+
+  const fetchUserProfile = useCallback(async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+        const { data: profileData, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+        if (error) {
+            toast({ title: 'Error fetching profile', description: error.message, variant: 'destructive' });
+        } else {
+            setCurrentUser(profileData);
+        }
+    }
+    setLoading(false);
+  }, [supabase, toast]);
 
   useEffect(() => {
-    // This effect runs once on component mount to load the user from session storage.
-     if (typeof window !== 'undefined') {
-      const userJson = sessionStorage.getItem('currentUser');
-      if (userJson) {
-        try {
-          const user = JSON.parse(userJson);
-          // Ensure signedUpAt is a valid date string before creating a Date object
-          if (user.signedUpAt && !isNaN(new Date(user.signedUpAt).getTime())) {
-            setCurrentUser(user);
-          } else {
-            // If signedUpAt is missing or invalid, add a default one.
-            setCurrentUser({ ...user, signedUpAt: new Date().toISOString() });
-          }
-        } catch (e) {
-          console.error("Failed to parse user data from session storage", e);
-        }
-      }
-    }
-  }, []);
+    fetchUserProfile();
+  }, [fetchUserProfile]);
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && currentUser) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast({
-          title: 'Image Too Large',
-          description: 'Please select an image smaller than 5MB.',
-          variant: 'destructive',
-        });
+    if (!file || !currentUser) return;
+    
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast({ title: 'Image Too Large', description: 'Please select an image smaller than 5MB.', variant: 'destructive' });
+      return;
+    }
+      
+    const filePath = `${currentUser.id}/${Date.now()}`;
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
+
+    if (uploadError) {
+        toast({ title: 'Avatar Upload Failed', description: uploadError.message, variant: 'destructive' });
         return;
-      }
-      
-      const newAvatarUrl = URL.createObjectURL(file);
-      const updatedUser = { ...currentUser, avatarUrl: newAvatarUrl };
+    }
 
-      // Update the component's state for immediate UI feedback.
-      setCurrentUser(updatedUser);
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
 
-       // Update session storage so the change persists across the app until reload
-      if (typeof window !== 'undefined') {
-          sessionStorage.setItem('currentUser', JSON.stringify(updatedUser));
-          // Manually trigger a storage event to update the header
-          window.dispatchEvent(new StorageEvent('storage', {
-            key: 'currentUser',
-            newValue: JSON.stringify(updatedUser)
-          }));
-      }
-      
-      toast({
-        title: 'Avatar Updated',
-        description: 'Your new profile picture has been set for this session.',
-      });
+    const { error: updateError } = await supabase
+        .from('users')
+        .update({ avatar_url: publicUrl })
+        .eq('id', currentUser.id);
+
+    if (updateError) {
+        toast({ title: 'Failed to update avatar', description: updateError.message, variant: 'destructive' });
+    } else {
+        setCurrentUser(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
+        toast({ title: 'Avatar Updated', description: 'Your new profile picture has been set.' });
     }
   };
 
-  const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.clear();
-      router.push('/login');
-    }
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
   };
 
-  if (!currentUser) {
+  if (loading || !currentUser) {
     return (
       <div className="flex justify-center items-center h-96">
         <p>Loading profile...</p>
@@ -121,7 +123,7 @@ export default function ProfilePage() {
         <CardHeader className="flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
           <div className="relative group shrink-0">
             <Avatar className="h-24 w-24 mb-4 sm:mb-0 border-4 border-primary/50 shadow-lg">
-              <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} data-ai-hint="person portrait" />
+              <AvatarImage src={currentUser.avatar_url} alt={currentUser.name} data-ai-hint="person portrait" />
               <AvatarFallback>
                 <User className="w-10 h-10" />
               </AvatarFallback>
@@ -151,7 +153,7 @@ export default function ProfilePage() {
           <div className="space-y-6">
             <div className="grid md:grid-cols-2 gap-x-6 gap-y-4">
                 <ProfileDetailItem icon={Mail} label="Email Address" value={currentUser.email} />
-                <ProfileDetailItem icon={CalendarDays} label="Member Since" value={format(new Date(currentUser.signedUpAt), "PPP")} />
+                <ProfileDetailItem icon={CalendarDays} label="Member Since" value={format(new Date(currentUser.signed_up_at), "PPP")} />
                 <ProfileDetailItem icon={BookCopy} label="Course/Branch" value={currentUser.course} />
                 <ProfileDetailItem icon={GraduationCap} label="Year" value={currentUser.year} />
             </div>

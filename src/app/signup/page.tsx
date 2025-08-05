@@ -8,11 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useUsers } from '@/hooks/use-users';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { years, initialCategories } from '@/lib/data';
-import { Separator } from '@/components/ui/separator';
+import { years, courses } from '@/lib/data';
+import { createClient } from '@/lib/supabase/client';
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -28,17 +27,18 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 export default function SignupPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
-  const { users } = useUsers();
   const { toast } = useToast();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleSignup = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
     const formData = new FormData(e.currentTarget);
     const firstName = formData.get('firstName') as string;
     const lastName = formData.get('lastName') as string;
@@ -50,51 +50,43 @@ export default function SignupPage() {
     const year = formData.get('year') as string;
 
     if (!firstName || !lastName || !username || !email || !password || !course || !year) {
-      toast({
-        title: "Incomplete Form",
-        description: "Please fill out all the required fields.",
-        variant: "destructive",
-      });
+      toast({ title: "Incomplete Form", description: "Please fill out all the required fields.", variant: "destructive" });
+      setLoading(false);
       return;
     }
     
     if (password !== confirmPassword) {
-      toast({
-        title: "Passwords Do Not Match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      });
+      toast({ title: "Passwords Do Not Match", description: "Please make sure your passwords match.", variant: "destructive" });
+      setLoading(false);
       return;
     }
 
-    if (users.some(user => user.email === email)) {
-        toast({
-            title: "Email Already Exists",
-            description: "An account with this email already exists. Please log in.",
-            variant: "destructive",
-        });
-        return;
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+            data: {
+                name: `${firstName} ${lastName}`,
+                first_name: firstName,
+                last_name: lastName,
+                username,
+                course,
+                year,
+            },
+            emailRedirectTo: `${location.origin}/auth/callback`
+        }
+    });
+
+    if (error) {
+        toast({ title: "Signup Error", description: error.message, variant: "destructive" });
+    } else if (data.user?.identities?.length === 0) {
+        toast({ title: "Email already in use", description: "This email address is already registered with another account.", variant: "destructive" });
+    } else {
+        toast({ title: "Confirm your email", description: "We've sent a confirmation link to your email address." });
+        router.push('/verify-email');
     }
-
-    const newUser = {
-      firstName,
-      lastName,
-      username,
-      email,
-      password,
-      course,
-      year,
-      id: String(Date.now()),
-      name: `${firstName} ${lastName}`,
-      signedUpAt: new Date().toISOString(),
-      avatarUrl: 'https://placehold.co/100x100.png',
-    };
-
-    if (typeof window !== 'undefined') {
-        sessionStorage.setItem('userToVerify', JSON.stringify(newUser));
-    }
-
-    router.push('/verify-email?type=signup');
+    setLoading(false);
   };
 
   return (
@@ -174,7 +166,7 @@ export default function SignupPage() {
                           <SelectValue placeholder="Select course" />
                       </SelectTrigger>
                       <SelectContent>
-                          {initialCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                          {courses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                       </SelectContent>
                   </Select>
                 </div>
@@ -191,7 +183,9 @@ export default function SignupPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full !mt-6">Create Account</Button>
+              <Button type="submit" className="w-full !mt-6" disabled={loading}>
+                {loading ? 'Creating Account...' : 'Create Account'}
+              </Button>
             </form>
             
             <div className="relative my-6">
@@ -205,7 +199,7 @@ export default function SignupPage() {
                 </div>
             </div>
 
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled>
                 <GoogleIcon className="mr-2 h-5 w-5" />
                 Sign up with Google
             </Button>

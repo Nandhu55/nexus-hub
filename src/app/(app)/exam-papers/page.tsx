@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Download, BookOpen, X, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,27 +11,61 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useQuestionPapers } from '@/hooks/use-question-papers';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useCategories } from '@/hooks/use-categories';
 import { years } from '@/lib/data';
 import { Separator } from '@/components/ui/separator';
 import type { QuestionPaper } from '@/lib/data';
 import { transformGoogleDriveLink } from '@/lib/utils';
 import PdfViewer from '@/components/features/PdfViewer';
+import { createClient } from '@/lib/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ExamPapersPage() {
-  const { questionPapers } = useQuestionPapers();
   const { toast } = useToast();
-  const { categories } = useCategories();
+  const [questionPapers, setQuestionPapers] = useState<QuestionPaper[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedYear, setSelectedYear] = useState('All');
   const [readingPaper, setReadingPaper] = useState<QuestionPaper | null>(null);
 
+  useEffect(() => {
+    const fetchPapersAndCategories = async () => {
+      const supabase = createClient();
+      setLoading(true);
+      
+      const { data: papersData, error: papersError } = await supabase
+        .from('question_papers')
+        .select('*');
+
+      if (papersError) {
+        toast({ title: 'Error fetching question papers', description: papersError.message, variant: 'destructive' });
+      } else {
+        setQuestionPapers(papersData || []);
+      }
+      
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('question_papers')
+        .select('category');
+
+      if (categoriesError) {
+        toast({ title: 'Error fetching categories', description: categoriesError.message, variant: 'destructive' });
+      } else {
+        const uniqueCategories = [...new Set(categoriesData.map(item => item.category))];
+        setCategories(uniqueCategories);
+      }
+
+      setLoading(false);
+    };
+    fetchPapersAndCategories();
+  }, [toast]);
+
+
   const handleDownload = (paper: QuestionPaper) => {
-    if (paper.downloadUrl === '#') {
+    if (paper.download_url === '#') {
         toast({
             title: "Download Unavailable",
             description: "A file for this question paper is not available yet.",
@@ -39,12 +73,12 @@ export default function ExamPapersPage() {
         });
         return;
     }
-    const downloadUrl = transformGoogleDriveLink(paper.downloadUrl, true);
+    const downloadUrl = transformGoogleDriveLink(paper.download_url, true);
     window.open(downloadUrl, '_blank');
   }
 
   const handleRead = (paper: QuestionPaper) => {
-    if (paper.downloadUrl && paper.downloadUrl !== '#') {
+    if (paper.download_url && paper.download_url !== '#') {
       setReadingPaper(paper);
     } else {
        toast({
@@ -62,10 +96,10 @@ export default function ExamPapersPage() {
   });
 
   const displayYears = ['All', ...years];
-  const displayCategories = ['All', ...categories.filter(c => c !== 'Finance' && c !== 'Motivation' && c !== 'All')];
+  const displayCategories = ['All', ...categories];
   
   if (readingPaper) {
-    const readUrl = transformGoogleDriveLink(readingPaper.downloadUrl, false);
+    const readUrl = transformGoogleDriveLink(readingPaper.download_url, false);
     return (
        <div className="fixed inset-0 bg-background z-50 flex flex-col">
           <header className="flex items-center justify-between p-2 sm:p-4 border-b bg-card">
@@ -99,38 +133,75 @@ export default function ExamPapersPage() {
           <p className="mt-2 text-muted-foreground">Browse and download previous year question papers.</p>
         </div>
         
-        <div className="space-y-4">
-          <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-sm font-medium text-muted-foreground w-full sm:w-20 shrink-0">Branch:</span>
-              {displayCategories.map(category => (
-              <Button 
-                  key={category}
-                  size="sm"
-                  variant={selectedCategory === category ? 'default' : 'outline'}
-                  onClick={() => setSelectedCategory(category)}
-              >
-                  {category}
-              </Button>
-              ))}
+        {loading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-1/2" />
+            <Skeleton className="h-8 w-2/3" />
+            <Skeleton className="h-8 w-1/2" />
           </div>
-          <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-sm font-medium text-muted-foreground w-full sm:w-20 shrink-0">Year:</span>
-              {displayYears.map(year => (
-              <Button 
-                  key={year}
-                  size="sm"
-                  variant={selectedYear === year ? 'default' : 'outline'}
-                  onClick={() => setSelectedYear(year)}
-              >
-                  {year}
-              </Button>
-              ))}
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-sm font-medium text-muted-foreground w-full sm:w-20 shrink-0">Branch:</span>
+                {displayCategories.map(category => (
+                <Button 
+                    key={category}
+                    size="sm"
+                    variant={selectedCategory === category ? 'default' : 'outline'}
+                    onClick={() => setSelectedCategory(category)}
+                >
+                    {category}
+                </Button>
+                ))}
+            </div>
+            <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-sm font-medium text-muted-foreground w-full sm:w-20 shrink-0">Year:</span>
+                {displayYears.map(year => (
+                <Button 
+                    key={year}
+                    size="sm"
+                    variant={selectedYear === year ? 'default' : 'outline'}
+                    onClick={() => setSelectedYear(year)}
+                >
+                    {year}
+                </Button>
+                ))}
+            </div>
           </div>
-        </div>
+        )}
         
         <Separator />
 
-        {filteredPapers.length > 0 ? (
+        {loading ? (
+          <div className="border rounded-lg hidden md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Subject</TableHead>
+                  <TableHead>Year</TableHead>
+                  <TableHead>Semester</TableHead>
+                  <TableHead>University</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...Array(5)].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                    <TableCell className="text-right space-x-2">
+                       <Skeleton className="h-9 w-48" />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : filteredPapers.length > 0 ? (
           <>
             {/* Table for Desktop */}
             <div className="border rounded-lg hidden md:block">

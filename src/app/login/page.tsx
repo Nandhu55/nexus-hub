@@ -9,44 +9,41 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useUsers } from '@/hooks/use-users';
+import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { users } = useUsers();
-
+  const [loading, setLoading] = useState(false);
   const [studentEmail, setStudentEmail] = useState('');
   const [studentPassword, setStudentPassword] = useState('');
 
   useEffect(() => {
     setMounted(true);
-    // On mount, clear any session state
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem('isLoggedIn');
-      sessionStorage.removeItem('currentUser');
-      sessionStorage.removeItem('userToVerify');
-    }
   }, []);
 
-  const handleStudentLogin = (e: React.FormEvent) => {
+  const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const user = users.find(u => u.email === studentEmail && u.password === studentPassword);
+    setLoading(true);
+    const supabase = createClient();
     
-    if (user) {
-        if (typeof window !== 'undefined') {
-            sessionStorage.setItem('isLoggedIn', 'true');
-            sessionStorage.setItem('currentUser', JSON.stringify(user));
-        }
-        router.push('/library');
-    } else {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: studentEmail,
+      password: studentPassword,
+    });
+
+    if (error) {
         toast({
             title: 'Login Failed',
-            description: 'Invalid student credentials. Please try again.',
+            description: error.message,
             variant: 'destructive',
         });
+    } else {
+        router.push('/library');
+        router.refresh(); // to re-run server-side auth checks
     }
+    setLoading(false);
   };
 
   return (
@@ -69,7 +66,7 @@ export default function LoginPage() {
                 <Label htmlFor="student-email">Email</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input id="student-email" type="email" placeholder="student@example.com" required className="pl-10" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} />
+                  <Input id="student-email" type="email" placeholder="student@example.com" required className="pl-10" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} disabled={loading} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -84,10 +81,12 @@ export default function LoginPage() {
                 </div>
                  <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input id="student-password" type="password" placeholder="••••••••" required className="pl-10" value={studentPassword} onChange={(e) => setStudentPassword(e.target.value)} />
+                  <Input id="student-password" type="password" placeholder="••••••••" required className="pl-10" value={studentPassword} onChange={(e) => setStudentPassword(e.target.value)} disabled={loading} />
                 </div>
               </div>
-              <Button type="submit" className="w-full !mt-6">Login</Button>
+              <Button type="submit" className="w-full !mt-6" disabled={loading}>
+                {loading ? 'Logging in...' : 'Login'}
+              </Button>
             </form>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{' '}

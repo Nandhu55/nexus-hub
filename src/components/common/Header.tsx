@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { BookMarked, LogOut, User, LayoutDashboard, Terminal, Home, Bell, Trash2, FileText, Shapes, Briefcase, BookHeart, UserPlus, BookCheck, Shield, Menu } from 'lucide-react';
+import { BookMarked, LogOut, User as UserIcon, Bell, Trash2, FileText, Shapes, Briefcase, BookHeart, UserPlus, BookCheck, Shield, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -12,19 +12,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuGroup,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useNotifications } from '@/hooks/use-notifications';
 import { Badge } from '@/components/ui/badge';
-import type { User as UserType } from '@/lib/data';
-import type { Notification } from '@/hooks/use-notifications';
+import type { Notification } from '@/lib/data';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ThemeToggle } from './theme-toggle';
+import { createClient } from '@/lib/supabase/client';
+import type { User } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
 
 function NotificationIcon({ type }: { type: Notification['type'] }) {
     const iconProps = { className: "h-5 w-5" };
@@ -40,39 +36,63 @@ function NotificationIcon({ type }: { type: Notification['type'] }) {
     }
 }
 
-export function Header() {
-  const { notifications, clearNotifications, markAsRead } = useNotifications();
-  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
+export function Header({ user }: { user: User }) {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const supabase = createClient();
 
-  const updateUserFromSession = useCallback(() => {
-    const userJson = sessionStorage.getItem('currentUser');
-    if (userJson) {
-      try {
-        setCurrentUser(JSON.parse(userJson));
-      } catch (e) {
-        console.error("Could not parse user JSON from session storage", e);
-        setCurrentUser(null);
-      }
+  const fetchNotifications = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('timestamp', { ascending: false })
+        .limit(10);
+    
+    if (error) {
+        // Handle error silently for now
+        console.error("Error fetching notifications:", error);
     } else {
-      setCurrentUser(null);
+        setNotifications(data || []);
     }
-  }, []);
+    setLoading(false);
+  }, [supabase, user.id]);
 
   useEffect(() => {
-    updateUserFromSession();
+    fetchNotifications();
 
-    const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'currentUser' || event.key === 'isLoggedIn') {
-        updateUserFromSession();
-      }
-    };
+    const channel = supabase
+      .channel(`notifications:${user.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, 
+      (payload) => {
+        console.log('Change received!', payload)
+        fetchNotifications();
+      })
+      .subscribe();
 
-    window.addEventListener('storage', handleStorageChange);
-    
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      supabase.removeChannel(channel);
     };
-  }, [updateUserFromSession]);
+
+  }, [fetchNotifications, supabase, user.id]);
+
+  const clearNotifications = async () => {
+    const { error } = await supabase.from('notifications').delete().eq('user_id', user.id);
+    if (!error) setNotifications([]);
+  };
+
+  const markAsRead = async () => {
+    const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
+    if (unreadIds.length === 0) return;
+    
+    const { error } = await supabase.from('notifications').update({ read: true }).in('id', unreadIds);
+    if (!error) {
+        setNotifications(notifications.map(n => ({ ...n, read: true })));
+    }
+  };
+
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -94,18 +114,19 @@ export function Header() {
     }
   }
 
-  const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-        sessionStorage.clear();
-    }
-    // No need to router.push, the layout effect will handle it.
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
   }
+
+  const userMetadata = user.user_metadata;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-primary/10 bg-background/80 backdrop-blur-sm">
       <div className="container flex h-16 items-center px-4">
         <Link href="/library" className="flex items-center gap-3 group">
-            <Terminal className="h-8 w-8 text-primary group-hover:text-primary/80 transition-colors duration-300" />
+            <BookMarked className="h-8 w-8 text-primary group-hover:text-primary/80 transition-colors duration-300" />
             <span className="font-headline text-2xl font-bold text-foreground tracking-tighter group-hover:text-primary transition-colors duration-300">
                 B-Tech Hub
             </span>
@@ -115,8 +136,8 @@ export function Header() {
             <nav className="hidden md:flex items-center gap-1">
                 <Button asChild variant="ghost">
                     <Link href="/library">
-                        <Home className="mr-2 h-4 w-4" />
-                        <span>Home</span>
+                        <BookHeart className="mr-2 h-4 w-4" />
+                        <span>Library</span>
                     </Link>
                 </Button>
                 <Button asChild variant="ghost">
@@ -161,8 +182,8 @@ export function Header() {
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem asChild>
                                 <Link href="/library">
-                                    <Home className="mr-2 h-4 w-4" />
-                                    <span>Home</span>
+                                    <BookHeart className="mr-2 h-4 w-4" />
+                                    <span>Library</span>
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
@@ -213,8 +234,9 @@ export function Header() {
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <ScrollArea className="h-[300px]">
-                            <DropdownMenuGroup>
-                            {notifications.length === 0 ? (
+                            {loading ? (
+                                <p className="text-center text-sm text-muted-foreground py-10">Loading...</p>
+                            ) : notifications.length === 0 ? (
                                 <p className="text-center text-sm text-muted-foreground py-10">No new notifications</p>
                             ) : (
                                 notifications.map((n) => (
@@ -233,7 +255,6 @@ export function Header() {
                                     </DropdownMenuItem>
                                 ))
                             )}
-                            </DropdownMenuGroup>
                         </ScrollArea>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -242,9 +263,9 @@ export function Header() {
                     <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                         <Avatar className="h-10 w-10 border-2 border-primary/50 hover:border-primary transition-colors duration-300">
-                        <AvatarImage src={currentUser?.avatarUrl} alt={currentUser?.name} data-ai-hint="person portrait" />
+                        <AvatarImage src={userMetadata?.avatar_url} alt={userMetadata?.name} data-ai-hint="person portrait" />
                         <AvatarFallback>
-                            <User />
+                            <UserIcon />
                         </AvatarFallback>
                         </Avatar>
                     </Button>
@@ -252,25 +273,23 @@ export function Header() {
                     <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                         <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{currentUser?.name || 'Student'}</p>
+                        <p className="text-sm font-medium leading-none">{userMetadata?.name || 'Student'}</p>
                         <p className="text-xs leading-none text-muted-foreground">
-                            {currentUser?.email || 'student@example.com'}
+                            {user.email}
                         </p>
                         </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                         <Link href="/profile">
-                            <User className="mr-2 h-4 w-4" />
+                            <UserIcon className="mr-2 h-4 w-4" />
                             <span>Profile</span>
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild onClick={handleLogout}>
-                        <Link href="/login">
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log out</span>
-                        </Link>
+                    <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
                     </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

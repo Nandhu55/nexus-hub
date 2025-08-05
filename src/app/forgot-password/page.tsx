@@ -9,37 +9,41 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useUsers } from '@/hooks/use-users';
+import { createClient } from '@/lib/supabase/client';
 
 export default function ForgotPasswordPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { users } = useUsers();
   const [email, setEmail] = useState('');
-
+  const [loading, setLoading] = useState(false);
+  
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const userExists = users.some(u => u.email === email);
-    
-    if (!userExists) {
-      toast({
-        title: "User Not Found",
-        description: "No account found with that email address.",
-        variant: "destructive",
-      });
-      return;
+    setLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${location.origin}/reset-password`,
+    });
+
+    if (error) {
+        toast({
+            title: "Error sending reset link",
+            description: error.message,
+            variant: "destructive",
+        });
+    } else {
+        toast({
+            title: "Password Reset Email Sent",
+            description: "Check your email for a link to reset your password.",
+        });
+        // We don't redirect here, just inform the user to check their email.
     }
-    
-    if (typeof window !== 'undefined') {
-        sessionStorage.setItem('passwordResetEmail', email);
-    }
-    
-    router.push('/verify-email?type=reset');
+    setLoading(false);
   };
 
   return (
@@ -54,7 +58,7 @@ export default function ForgotPasswordPage() {
               <h1 className="font-headline text-3xl font-bold text-primary group-hover:text-primary/80 transition-colors">B-Tech Hub</h1>
             </Link>
             <CardTitle className="font-headline text-2xl">Forgot Password</CardTitle>
-            <CardDescription>Enter your email to receive a password reset code.</CardDescription>
+            <CardDescription>Enter your email to receive a password reset link.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4 pt-4">
@@ -70,10 +74,13 @@ export default function ForgotPasswordPage() {
                     className="pl-10" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)} 
+                    disabled={loading}
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full !mt-6">Send Reset Code</Button>
+              <Button type="submit" className="w-full !mt-6" disabled={loading}>
+                {loading ? 'Sending...' : 'Send Reset Link'}
+              </Button>
             </form>
             <Button variant="link" asChild className="mt-4 w-full">
                 <Link href="/login">

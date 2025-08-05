@@ -1,14 +1,19 @@
 import { Header } from '@/components/common/Header';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  // Note: The client-side auth check has been removed from this layout
-  // to convert it into a Server Component for performance.
-  // The check can be added to specific layouts as needed,
-  // but the primary app shell is now static.
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const supabase = createClient();
 
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return redirect('/login');
+  }
+  
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header user={user} />
       <main className="container py-6 sm:py-8">{children}</main>
     </div>
   );

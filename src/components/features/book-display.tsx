@@ -22,8 +22,8 @@ export default function BookDisplay({ book }: BookDisplayProps) {
   const router = useRouter();
   const [isReading, setIsReading] = useState(false);
 
-  const hasPdf = book.pdfUrl && book.pdfUrl !== '#';
-  const readUrl = hasPdf ? transformGoogleDriveLink(book.pdfUrl, false) : '#';
+  const hasPdf = book.pdf_url && book.pdf_url !== '#';
+  const readUrl = hasPdf ? transformGoogleDriveLink(book.pdf_url, false) : '#';
 
   const handleShare = async () => {
     const fallbackCopyLink = () => {
@@ -58,7 +58,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
       });
       return;
     }
-    const downloadUrl = transformGoogleDriveLink(book.pdfUrl, true);
+    const downloadUrl = transformGoogleDriveLink(book.pdf_url, true);
     window.open(downloadUrl, '_blank');
   };
 
@@ -111,12 +111,12 @@ export default function BookDisplay({ book }: BookDisplayProps) {
             <div className="md:col-span-4 lg:col-span-3">
                 <div className="relative aspect-[2/3] w-full max-w-xs mx-auto shadow-2xl rounded-lg overflow-hidden border-4 border-primary/20">
                     <Image
-                    src={book.coverImage}
+                    src={book.cover_image}
                     alt={`Cover of ${book.title}`}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    data-ai-hint={book.dataAiHint}
+                    data-ai-hint={book.data_ai_hint}
                     />
                 </div>
             </div>
@@ -167,7 +167,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
                         <p>{book.description}</p>
                     </div>
 
-                    <Remarks bookId={(book.id as unknown as number)} />
+                    <Remarks bookId={book.id} />
                 </div>
             </div>
         </div>

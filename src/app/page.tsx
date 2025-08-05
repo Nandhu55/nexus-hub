@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { BookMarked, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/common/theme-toggle';
+import { createClient } from '@/lib/supabase/client';
 
 export default function LandingPage() {
     const [mounted, setMounted] = useState(false);
@@ -13,13 +14,14 @@ export default function LandingPage() {
 
     useEffect(() => {
         setMounted(true);
-        // Check if user is already logged in and redirect to dashboard
-        if (typeof window !== 'undefined') {
-            const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-            if (isLoggedIn) {
+        const checkUser = async () => {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
                 router.replace('/library');
             }
-        }
+        };
+        checkUser();
     }, [router]);
 
     return (

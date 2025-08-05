@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { BookCard } from '@/components/library/BookCard';
 import { Terminal, Search } from 'lucide-react';
 import {
@@ -14,17 +14,41 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Book } from '@/lib/data';
-import { useBooks } from '@/hooks/use-books';
 import { years } from '@/lib/data';
-import { useCategories } from '@/hooks/use-categories';
+import { createClient } from '@/lib/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// This is now a CLIENT component that handles its own state for filtering.
 export default function LibraryPage() {
-    const { books } = useBooks();
-    const { categories } = useCategories();
+    const { toast } = useToast();
+    const [books, setBooks] = useState<Book[]>([]);
+    const [categories, setCategories] = useState<string[]>([]);
+    const [loading, setLoading] = useState(true);
     
+    useEffect(() => {
+        const fetchBooksAndCategories = async () => {
+            const supabase = createClient();
+            setLoading(true);
+
+            const { data: booksData, error: booksError } = await supabase
+                .from('books')
+                .select('*')
+                .in('category', ['Computer Science', 'Electronics', 'Mechanical', 'Civil Engineering']);
+
+            if (booksError) {
+                toast({ title: "Error fetching books", description: booksError.message, variant: "destructive" });
+            } else {
+                setBooks(booksData || []);
+                const uniqueCategories = [...new Set(booksData.map(book => book.category))];
+                setCategories(uniqueCategories);
+            }
+            setLoading(false);
+        }
+        fetchBooksAndCategories();
+    }, [toast]);
+
     const featuredBooks = useMemo(() => books.slice(0, 10), [books]);
-    const academicCategories = useMemo(() => ['All', ...categories.filter(c => c !== 'Finance' && c !== 'Motivation' && c !== 'All')], [categories]);
+    const academicCategories = useMemo(() => ['All', ...categories], [categories]);
     const displayYears = useMemo(() => ['All', ...years], []);
 
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -33,9 +57,6 @@ export default function LibraryPage() {
 
     const filteredBooks = useMemo(() => {
         return books.filter(book => {
-            const isAcademic = !['Finance', 'Motivation'].includes(book.category);
-            if (!isAcademic) return false;
-
             const categoryMatch = selectedCategory === 'All' || book.category === selectedCategory;
             const yearMatch = selectedYear === 'All' || book.year === selectedYear;
             const searchMatch = searchQuery.trim() === '' || 
@@ -46,7 +67,6 @@ export default function LibraryPage() {
             return categoryMatch && yearMatch && searchMatch;
         });
     }, [books, selectedCategory, selectedYear, searchQuery]);
-
 
   return (
     <div className="space-y-8 sm:space-y-12">
@@ -64,25 +84,36 @@ export default function LibraryPage() {
                 <Terminal />
                 Featured Books
                 </h2>
-                <Carousel
-                opts={{
-                    align: "start",
-                    loop: true,
-                }}
-                className="w-full"
-                >
-                <CarouselContent className="-ml-2 sm:-ml-4">
-                    {featuredBooks.map((book) => (
-                    <CarouselItem key={book.id} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-2 sm:pl-4">
-                        <div className="p-1 h-full">
-                        <BookCard book={book} />
+                {loading ? (
+                    <div className="w-full overflow-hidden">
+                        <div className="flex -ml-2 sm:-ml-4">
+                            {[...Array(5)].map((_, i) => (
+                                <div key={i} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-2 sm:pl-4">
+                                    <Skeleton className="aspect-[2/3] w-full" />
+                                    <Skeleton className="h-4 w-3/4 mt-2" />
+                                    <Skeleton className="h-3 w-1/2 mt-1" />
+                                </div>
+                            ))}
                         </div>
-                    </CarouselItem>
-                    ))}
-                </CarouselContent>
-                <CarouselPrevious className="hover:bg-primary/20 hidden sm:flex" />
-                <CarouselNext className="hover:bg-primary/20 hidden sm:flex" />
-                </Carousel>
+                    </div>
+                ) : (
+                    <Carousel
+                        opts={{ align: "start", loop: true, }}
+                        className="w-full"
+                    >
+                        <CarouselContent className="-ml-2 sm:-ml-4">
+                            {featuredBooks.map((book) => (
+                            <CarouselItem key={book.id} className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 pl-2 sm:pl-4">
+                                <div className="p-1 h-full">
+                                <BookCard book={book} />
+                                </div>
+                            </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="hover:bg-primary/20 hidden sm:flex" />
+                        <CarouselNext className="hover:bg-primary/20 hidden sm:flex" />
+                    </Carousel>
+                )}
             </div>
         </div>
       
@@ -134,18 +165,30 @@ export default function LibraryPage() {
                     </div>
                 </div>
             </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
-                {filteredBooks.length > 0 ? (
-                    filteredBooks.map(book => (
-                        <BookCard key={book.id} book={book} />
-                    ))
-                ) : (
-                    <div className="col-span-full text-center py-12">
-                        <p className="text-muted-foreground">No books found for the selected filters.</p>
-                    </div>
-                )}
-            </div>
+            
+            {loading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
+                    {[...Array(12)].map((_, i) => (
+                         <div key={i} className="space-y-2">
+                             <Skeleton className="aspect-[2/3] w-full" />
+                             <Skeleton className="h-4 w-3/4" />
+                             <Skeleton className="h-3 w-1/2" />
+                         </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
+                    {filteredBooks.length > 0 ? (
+                        filteredBooks.map(book => (
+                            <BookCard key={book.id} book={book} />
+                        ))
+                    ) : (
+                        <div className="col-span-full text-center py-12">
+                            <p className="text-muted-foreground">No books found for the selected filters.</p>
+                        </div>
+                    )}
+                </div>
+            )}
        </div>
 
     </div>
