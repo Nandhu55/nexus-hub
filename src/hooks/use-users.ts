@@ -3,14 +3,17 @@ import { useState } from 'react';
 export type User = {
     id: number;
     name: string;
+    username: string;
     email: string;
     password?: string;
+    course: string;
+    year: string;
 };
 
 // This would typically come from a database or API
 const initialUsers: User[] = [
-  { id: 1, name: 'Student User', email: 'student@example.com', password: 'password' },
-  { id: 2, name: 'Jane Doe', email: 'jane@example.com', password: 'password123' },
+  { id: 1, name: 'Student User', username: 'student', email: 'student@example.com', password: 'password', course: 'Computer Science', year: '2nd Year' },
+  { id: 2, name: 'Jane Doe', username: 'janedoe', email: 'jane@example.com', password: 'password123', course: 'Electrical Engineering', year: '3rd Year' },
 ];
 
 export const useUsers = () => {

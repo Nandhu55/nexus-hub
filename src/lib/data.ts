@@ -84,3 +84,19 @@ export const books: Book[] = [
     content: 'Introduction: We stand at a precipice. The ability to create beings of silicon that mirror our own intelligence is no longer science fiction. This book does not ask "can we?" but rather, "should we?"'
   },
 ];
+
+export const courses = [
+    'Computer Science & Engineering',
+    'Electronics & Communication Engineering',
+    'Electrical & Electronics Engineering',
+    'Mechanical Engineering',
+    'Civil Engineering',
+    'Information Technology'
+];
+
+export const years = [
+    '1st Year',
+    '2nd Year',
+    '3rd Year',
+    '4th Year'
+];
