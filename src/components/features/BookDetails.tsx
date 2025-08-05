@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { notFound, useRouter } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { useBooks } from '@/hooks/use-books';
 import BookDisplay from '@/components/features/book-display';
 import { Loader2 } from 'lucide-react';
@@ -14,7 +14,6 @@ interface BookDetailsProps {
 // This client component safely handles data loading, auth checks, and rendering.
 export default function BookDetails({ bookId }: BookDetailsProps) {
   const { books } = useBooks();
-  const router = useRouter();
   const [authStatus, setAuthStatus] = useState<'checking' | 'authenticated' | 'unauthenticated'>('checking');
   const [bookData, setBookData] = useState<Book | null | undefined>(undefined); // undefined: not checked, null: not found
 
@@ -26,19 +25,20 @@ export default function BookDetails({ bookId }: BookDetailsProps) {
         setAuthStatus('authenticated');
       } else {
         setAuthStatus('unauthenticated');
-        router.replace('/login');
+        // No redirect here. Let the UI handle the unauthenticated state if necessary,
+        // or rely on a higher-level layout to manage protected routes.
       }
     }
-  }, [router]);
+  }, []);
 
   useEffect(() => {
-    // This effect finds the book once the books array is populated and auth is checked.
-    // It will only run when `books` has loaded or `authStatus` changes.
-    if (authStatus === 'authenticated' && books.length > 0) {
-      const foundBook = books.find(b => b.id === parseInt(bookId, 10));
+    // This effect finds the book once the books array is populated.
+    // It will only run when `books` has loaded.
+    if (books.length > 0) {
+      const foundBook = books.find(b => String(b.id) === bookId);
       setBookData(foundBook || null); // Set to the book or null if not found
     }
-  }, [authStatus, books, bookId]);
+  }, [books, bookId]);
 
   // Combined loading state: wait for auth and for the book search to complete.
   if (authStatus === 'checking' || bookData === undefined) {
@@ -50,9 +50,14 @@ export default function BookDetails({ bookId }: BookDetailsProps) {
     );
   }
 
-  // If auth fails, we're redirecting, so render nothing.
+  // If after checking, the user is not authenticated, you could show a message
+  // or a login prompt, but a hard redirect from here can be problematic.
   if (authStatus !== 'authenticated') {
-    return null;
+    return (
+       <div className="flex justify-center items-center h-96">
+        <p>Please log in to view this content.</p>
+      </div>
+    )
   }
 
   // After loading, if the book is definitively not found, show the 404 page.
