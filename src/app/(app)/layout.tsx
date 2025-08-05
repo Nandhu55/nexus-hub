@@ -1,8 +1,24 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/common/Header';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    // This check is crucial for protecting routes that require a login.
+    // It runs only on the client-side after the initial page load.
+    if (typeof window !== 'undefined') {
+      const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+      const isAdmin = sessionStorage.getItem('isAdmin');
+      if (isLoggedIn !== 'true' && isAdmin !== 'true') {
+        router.replace('/login');
+      }
+    }
+  }, [router]);
+  
   return (
     <div className="min-h-screen bg-background">
       <Header />
