@@ -24,7 +24,7 @@ export type QuestionPaper = {
 };
 
 export type User = {
-    id: number;
+    id: string;
     name: string;
     username: string;
     email: string;
@@ -216,6 +216,12 @@ export const allBooks: Book[] = [
   }
 ];
 
+export const allUsers: User[] = [
+  { id: '1', name: 'Student User', username: 'student', email: 'student@example.com', password: 'password', course: 'Computer Science', year: '2nd Year', avatarUrl: 'https://placehold.co/100x100.png', signedUpAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString() },
+  { id: '2', name: 'Jane Doe', username: 'janedoe', email: 'jane@example.com', password: 'password123', course: 'Electrical Engineering', year: '3rd Year', avatarUrl: 'https://placehold.co/100x100.png', signedUpAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString() },
+];
+
+
 export const years = [
     '1st Year',
     '2nd Year',
@@ -265,3 +271,4 @@ export const questionPapers: QuestionPaper[] = [
         downloadUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
     },
 ];
+

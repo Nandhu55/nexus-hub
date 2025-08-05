@@ -68,7 +68,8 @@ export default function SignupPage() {
     }
 
     const newUser = addUser({
-      name: `${firstName} ${lastName}`,
+      firstName,
+      lastName,
       username,
       email,
       password,
@@ -81,11 +82,7 @@ export default function SignupPage() {
         sessionStorage.setItem('currentUser', JSON.stringify(newUser));
     }
 
-    toast({
-        title: `Welcome, ${firstName}!`,
-        description: "Your account has been created successfully.",
-        variant: 'default'
-    });
+    // No toast here, as the useUsers hook now handles it.
 
     router.push('/library');
   };

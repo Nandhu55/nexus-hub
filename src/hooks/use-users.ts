@@ -1,36 +1,72 @@
-import { useState } from 'react';
+'use client';
 
-export type User = {
-    id: number;
-    name: string;
-    username: string;
-    email: string;
-    password?: string;
-    course: string;
-    year: string;
-    avatarUrl?: string;
-    signedUpAt: string;
-};
+import { useState, useEffect } from 'react';
+import { type User, allUsers } from '@/lib/data';
+import { useNotifications } from './use-notifications';
 
-// This would typically come from a database or API
-const initialUsers: User[] = [
-  { id: 1, name: 'Student User', username: 'student', email: 'student@example.com', password: 'password', course: 'Computer Science', year: '2nd Year', avatarUrl: 'https://placehold.co/100x100.png', signedUpAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString() },
-  { id: 2, name: 'Jane Doe', username: 'janedoe', email: 'jane@example.com', password: 'password123', course: 'Electrical Engineering', year: '3rd Year', avatarUrl: 'https://placehold.co/100x100.png', signedUpAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString() },
-];
+const USERS_STORAGE_KEY = 'b-tech-hub-users';
 
-export const useUsers = () => {
-  const [users, setUsers] = useState(initialUsers);
+export function useUsers() {
+  const [users, setUsers] = useState<User[]>([]);
+  const { addNotification } = useNotifications();
 
-  const addUser = (user: Omit<User, 'id' | 'signedUpAt'>) => {
-    const newUser = { 
-        ...user, 
-        id: Math.max(...users.map(u => u.id), 0) + 1, 
-        avatarUrl: `https://i.pravatar.cc/150?u=${user.email}`,
-        signedUpAt: new Date().toISOString()
-    };
-    setUsers(prev => [...prev, newUser]);
+  useEffect(() => {
+    try {
+      const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+      if (storedUsers) {
+        setUsers(JSON.parse(storedUsers));
+      } else {
+        // If nothing in storage, initialize with default users
+        setUsers(allUsers);
+        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(allUsers));
+      }
+    } catch (error) {
+      // If any error (e.g. in SSR), use initial users
+      console.error("Failed to access local storage for users:", error);
+      setUsers(allUsers);
+    }
+  }, []);
+
+  const updateStoredUsers = (updatedUsers: User[]) => {
+    setUsers(updatedUsers);
+    try {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(updatedUsers));
+    } catch (error) {
+      console.error("Failed to save users to local storage:", error);
+    }
+  };
+
+  const addUser = (user: Omit<User, 'id' | 'avatarUrl' | 'signedUpAt' | 'name'> & { firstName: string, lastName: string }): User => {
+    const newUser: User = {
+      ...user,
+      id: String(Date.now()),
+      name: `${user.firstName} ${user.lastName}`,
+      signedUpAt: new Date().toISOString(),
+      avatarUrl: 'https://placehold.co/100x100.png',
+    }
+    const updatedUsers = [...users, newUser];
+    updateStoredUsers(updatedUsers);
+
+    addNotification({
+        title: `Welcome, ${user.firstName}!`,
+        description: "Your account has been created successfully.",
+        type: 'welcome'
+    });
+    
     return newUser;
-  }
+  };
 
-  return { users, addUser };
-};
+  const deleteUser = (userId: string) => {
+    const updatedUsers = users.filter(user => user.id !== userId);
+    updateStoredUsers(updatedUsers);
+  };
+
+  const updateUser = (userId: string, updates: Partial<User>) => {
+    const updatedUsers = users.map(user =>
+      user.id === userId ? { ...user, ...updates } : user
+    );
+    updateStoredUsers(updatedUsers);
+  };
+
+  return { users, addUser, deleteUser, updateUser };
+}
