@@ -23,7 +23,7 @@ export default function LibraryPage() {
     const { books } = useBooks();
     
     const featuredBooks = useMemo(() => books.slice(0, 10), [books]);
-    const academicCategories = useMemo(() => ['All', ...bookCategories], []);
+    const academicCategories = useMemo(() => ['All', ...bookCategories.filter(c => c !== 'Finance' && c !== 'Motivation')], []);
     const displayYears = useMemo(() => ['All', ...years], []);
 
     const [selectedCategory, setSelectedCategory] = useState('All');
@@ -32,6 +32,9 @@ export default function LibraryPage() {
 
     const filteredBooks = useMemo(() => {
         return books.filter(book => {
+            const isAcademic = !['Finance', 'Motivation'].includes(book.category);
+            if (!isAcademic) return false;
+
             const categoryMatch = selectedCategory === 'All' || book.category === selectedCategory;
             const yearMatch = selectedYear === 'All' || book.year === selectedYear;
             const searchMatch = searchQuery.trim() === '' || 

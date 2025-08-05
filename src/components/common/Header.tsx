@@ -141,6 +141,12 @@ export function Header() {
                             <span>Career Guidance</span>
                         </Link>
                         </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                        <Link href="/other-books">
+                            <BookHeart className="mr-2 h-4 w-4" />
+                            <span>Other Books</span>
+                        </Link>
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </nav>
@@ -173,6 +179,12 @@ export function Header() {
                             <Link href="/career-guidance">
                                 <Briefcase className="mr-2 h-4 w-4" />
                                 <span>Career Guidance</span>
+                            </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                            <Link href="/other-books">
+                                <BookHeart className="mr-2 h-4 w-4" />
+                                <span>Other Books</span>
                             </Link>
                             </DropdownMenuItem>
                         </DropdownMenuContent>

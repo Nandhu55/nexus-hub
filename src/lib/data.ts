@@ -2,7 +2,7 @@ export type Book = {
   id: number;
   title: string;
   author: string;
-  category: 'Fiction' | 'Sci-Fi' | 'Fantasy' | 'History' | 'Tech' | 'Computer Science & Engineering' | 'Electronics & Communication Engineering' | 'Electrical & Electronics Engineering' | 'Mechanical Engineering' | 'Civil Engineering' | 'Information Technology';
+  category: 'Fiction' | 'Sci-Fi' | 'Fantasy' | 'History' | 'Tech' | 'Computer Science & Engineering' | 'Electronics & Communication Engineering' | 'Electrical & Electronics Engineering' | 'Mechanical Engineering' | 'Civil Engineering' | 'Information Technology' | 'Finance' | 'Motivation';
   cover: string;
   description: string;
   content: string;
@@ -32,7 +32,7 @@ export type User = {
     avatarUrl?: string;
 };
 
-export const bookCategories: Book['category'][] = ['Fiction', 'Sci-Fi', 'Fantasy', 'History', 'Tech', 'Computer Science & Engineering', 'Electronics & Communication Engineering', 'Electrical & Electronics Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Information Technology'];
+export const bookCategories: Book['category'][] = ['Fiction', 'Sci-Fi', 'Fantasy', 'History', 'Tech', 'Computer Science & Engineering', 'Electronics & Communication Engineering', 'Electrical & Electronics Engineering', 'Mechanical Engineering', 'Civil Engineering', 'Information Technology', 'Finance', 'Motivation'];
 
 export const books: Book[] = [
   {
@@ -156,6 +156,28 @@ export const books: Book[] = [
     dataAiHint: 'circuit board',
     year: '2nd Year'
   },
+  {
+    id: 12,
+    title: 'The Intelligent Investor',
+    author: 'Benjamin Graham',
+    category: 'Finance',
+    cover: 'https://placehold.co/400x600',
+    description: 'The definitive guide to value investing, offering timeless wisdom on how to be a successful investor.',
+    content: 'Introduction: The purpose of this book is to provide, in a form suitable for laymen, guidance in the adoption and execution of an investment policy...',
+    dataAiHint: 'stock market',
+    year: 'All'
+  },
+  {
+    id: 13,
+    title: 'Atomic Habits',
+    author: 'James Clear',
+    category: 'Motivation',
+    cover: 'https://placehold.co/400x600',
+    description: 'A proven framework for improving every day. Learn how to build good habits and break bad ones.',
+    content: 'Chapter 1: The Surprising Power of Atomic Habits. The Fundamentals. Why small habits make a big difference...',
+    dataAiHint: 'person thinking',
+    year: 'All'
+  }
 ];
 
 export const courses = [
