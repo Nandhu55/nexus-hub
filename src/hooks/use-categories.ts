@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -49,3 +50,5 @@ export function useCategories() {
 
   return { categories, addCategory, deleteCategory };
 }
+
+    
