@@ -76,15 +76,19 @@ export default function SignupPage() {
       return;
     }
 
-    const { error } = await supabase.functions.invoke('send-otp', {
-        body: { email: formData.email },
+    const res = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email }),
     });
 
-    if (!error) {
+    const data = await res.json();
+
+    if (res.ok) {
         toast({ title: 'OTP Sent!', description: 'Check your email for the verification code.' });
         setStep(2);
     } else {
-        toast({ title: 'Failed to Send OTP', description: error.message, variant: 'destructive' });
+        toast({ title: 'Failed to Send OTP', description: data.error, variant: 'destructive' });
     }
 
     setLoading(false);
@@ -94,13 +98,16 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
 
-    const { error: otpError } = await supabase.functions.invoke('verify-otp', {
-        body: { email: formData.email, otp },
+    const verifyRes = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, otp }),
     });
 
+    const verifyData = await verifyRes.json();
 
-    if (otpError) {
-        toast({ title: "OTP Verification Failed", description: otpError.message, variant: "destructive" });
+    if (!verifyRes.ok) {
+        toast({ title: "OTP Verification Failed", description: verifyData.error, variant: "destructive" });
         setLoading(false);
         return;
     }
@@ -281,5 +288,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
-    
