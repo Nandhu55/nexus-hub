@@ -32,8 +32,7 @@ export default function LibraryPage() {
 
             const { data: booksData, error: booksError } = await supabase
                 .from('books')
-                .select('*')
-                .in('category', ['Computer Science', 'Electronics', 'Mechanical', 'Civil Engineering']);
+                .select('*');
 
             if (booksError) {
                 toast({ title: "Error fetching books", description: booksError.message, variant: "destructive" });

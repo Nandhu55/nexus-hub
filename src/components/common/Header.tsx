@@ -52,7 +52,6 @@ export function Header({ user }: { user: User }) {
         .limit(10);
     
     if (error) {
-        // Handle error silently for now
         console.error("Error fetching notifications:", error);
     } else {
         setNotifications(data || []);
@@ -67,7 +66,6 @@ export function Header({ user }: { user: User }) {
       .channel(`notifications:${user.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, 
       (payload) => {
-        console.log('Change received!', payload)
         fetchNotifications();
       })
       .subscribe();

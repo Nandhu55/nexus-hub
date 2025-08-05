@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import type { User as UserData } from '@/lib/data';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProfilePage() {
   const { toast } = useToast();
@@ -88,8 +89,58 @@ export default function ProfilePage() {
 
   if (loading || !currentUser) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <p>Loading profile...</p>
+      <div className="max-w-3xl mx-auto space-y-8">
+        <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-2">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-4 w-64" />
+            </div>
+        </div>
+        <Card>
+            <CardHeader>
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                    <Skeleton className="h-24 w-24 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-4 w-24" />
+                    </div>
+                </div>
+            </CardHeader>
+            <Separator />
+            <CardContent className="pt-6 space-y-4">
+                 <div className="grid md:grid-cols-2 gap-6">
+                    <div className="flex items-start gap-4">
+                        <Skeleton className="h-6 w-6 rounded" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-20" />
+                            <Skeleton className="h-5 w-40" />
+                        </div>
+                    </div>
+                     <div className="flex items-start gap-4">
+                        <Skeleton className="h-6 w-6 rounded" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-20" />
+                            <Skeleton className="h-5 w-40" />
+                        </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                        <Skeleton className="h-6 w-6 rounded" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-20" />
+                            <Skeleton className="h-5 w-40" />
+                        </div>
+                    </div>
+                     <div className="flex items-start gap-4">
+                        <Skeleton className="h-6 w-6 rounded" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-20" />
+                            <Skeleton className="h-5 w-40" />
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
       </div>
     )
   }

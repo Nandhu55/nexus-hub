@@ -24,7 +24,7 @@ export default function OtherBooksPage() {
       const { data, error } = await supabase
         .from('books')
         .select('*')
-        .in('category', ['Finance', 'Motivation']);
+        .not('category', 'in', '("Computer Science", "Electronics", "Mechanical", "Civil Engineering")');
       
       if (error) {
         toast({ title: "Error fetching books", description: error.message, variant: "destructive" });
