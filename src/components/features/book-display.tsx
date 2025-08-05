@@ -11,7 +11,6 @@ import { cn, transformGoogleDriveLink } from '@/lib/utils';
 import type { Book } from '@/lib/data';
 import Remarks from '@/components/features/remarks';
 import PdfViewer from './PdfViewer';
-import { AiSummarizer } from '@/components/reader/AiSummarizer';
 import { Separator } from '../ui/separator';
 
 interface BookDisplayProps {
@@ -167,8 +166,6 @@ export default function BookDisplay({ book }: BookDisplayProps) {
                         <h2 className="font-headline text-2xl font-semibold">Description</h2>
                         <p>{book.description}</p>
                     </div>
-
-                    <AiSummarizer book={book} />
 
                     <Remarks bookId={(book.id as unknown as number)} />
                 </div>
