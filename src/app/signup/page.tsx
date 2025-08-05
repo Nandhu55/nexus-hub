@@ -1,15 +1,17 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { BookMarked, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { BookMarked, User, Mail, Lock, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 import { years, courses } from '@/lib/data';
 import { createClient } from '@/lib/supabase/client';
 
@@ -31,48 +33,94 @@ export default function SignupPage() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1);
+  const [otp, setOtp] = useState("");
+  const [formData, setFormData] = useState({
+      firstName: '',
+      lastName: '',
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      course: '',
+      year: '',
+  });
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+    
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }
+
+  const handleSendOtp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    const firstName = formData.get('firstName') as string;
-    const lastName = formData.get('lastName') as string;
-    const username = formData.get('username') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const confirmPassword = formData.get('confirmPassword') as string;
-    const course = formData.get('course') as string;
-    const year = formData.get('year') as string;
 
-    if (!firstName || !lastName || !username || !email || !password || !course || !year) {
+    if (!formData.firstName || !formData.lastName || !formData.username || !formData.email || !formData.password || !formData.course || !formData.year) {
       toast({ title: "Incomplete Form", description: "Please fill out all the required fields.", variant: "destructive" });
       setLoading(false);
       return;
     }
     
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       toast({ title: "Passwords Do Not Match", description: "Please make sure your passwords match.", variant: "destructive" });
       setLoading(false);
       return;
     }
 
+    const res = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email }),
+    });
+
+    if (res.ok) {
+        toast({ title: 'OTP Sent!', description: 'Check your email for the verification code.' });
+        setStep(2);
+    } else {
+        const data = await res.json();
+        toast({ title: 'Failed to Send OTP', description: data.error, variant: 'destructive' });
+    }
+
+    setLoading(false);
+  };
+  
+  const handleVerifyOtpAndSignup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const otpRes = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, otp }),
+    });
+
+    if (!otpRes.ok) {
+        const data = await otpRes.json();
+        toast({ title: "OTP Verification Failed", description: data.error, variant: "destructive" });
+        setLoading(false);
+        return;
+    }
+
     const supabase = createClient();
     const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: formData.email,
+        password: formData.password,
         options: {
             data: {
-                name: `${firstName} ${lastName}`,
-                first_name: firstName,
-                last_name: lastName,
-                username,
-                course,
-                year,
+                name: `${formData.firstName} ${formData.lastName}`,
+                first_name: formData.firstName,
+                last_name: formData.lastName,
+                username: formData.username,
+                course: formData.course,
+                year: formData.year,
             },
             emailRedirectTo: `${location.origin}/auth/callback`
         }
@@ -80,14 +128,12 @@ export default function SignupPage() {
 
     if (error) {
         toast({ title: "Signup Error", description: error.message, variant: "destructive" });
-    } else if (data.user?.identities?.length === 0) {
-        toast({ title: "Email already in use", description: "This email address is already registered with another account.", variant: "destructive" });
-    } else {
-        toast({ title: "Confirm your email", description: "We've sent a confirmation link to your email address." });
-        router.push('/verify-email');
+    } else if (data.user) {
+        toast({ title: "Account Created!", description: "You have successfully signed up. Please log in." });
+        router.push('/login');
     }
     setLoading(false);
-  };
+  }
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
@@ -100,93 +146,117 @@ export default function SignupPage() {
               <BookMarked className="h-10 w-10 text-primary group-hover:text-primary/80 transition-colors" />
               <h1 className="font-headline text-3xl font-bold text-primary group-hover:text-primary/80 transition-colors">B-Tech Hub</h1>
             </Link>
-            <CardTitle className="font-headline text-2xl">Create an Account</CardTitle>
-            <CardDescription>Join our community of learners today</CardDescription>
+            <CardTitle className="font-headline text-2xl">{step === 1 ? "Create an Account" : "Verify Your Email"}</CardTitle>
+            <CardDescription>{step === 1 ? "Join our community of learners today" : "Enter the OTP sent to your email"}</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input id="firstName" name="firstName" placeholder="John" required className="pl-10" />
+            {step === 1 && (
+                <form onSubmit={handleSendOtp} className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="firstName" name="firstName" placeholder="John" required className="pl-10" value={formData.firstName} onChange={handleInputChange} />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="lastName" name="lastName" placeholder="Doe" required className="pl-10" value={formData.lastName} onChange={handleInputChange} />
+                        </div>
                     </div>
                 </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                      <Input id="lastName" name="lastName" placeholder="Doe" required className="pl-10" />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="username" name="username" placeholder="johndoe123" required className="pl-10" value={formData.username} onChange={handleInputChange} />
                     </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input id="username" name="username" placeholder="johndoe123" required className="pl-10" />
-                  </div>
-              </div>
-              <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input id="email" name="email" type="email" placeholder="student@example.com" required className="pl-10" />
-                  </div>
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input id="password" name="password" type={passwordVisible ? "text" : "password"} placeholder="••••••••" required className="pl-10 pr-10" />
-                    <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground" onClick={() => setPasswordVisible(!passwordVisible)}>
-                        {passwordVisible ? <EyeOff /> : <Eye />}
-                    </Button>
-                  </div>
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="email" name="email" type="email" placeholder="student@example.com" required className="pl-10" value={formData.email} onChange={handleInputChange} />
+                    </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input id="confirmPassword" name="confirmPassword" type={confirmPasswordVisible ? "text" : "password"} placeholder="••••••••" required className="pl-10 pr-10" />
-                     <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground" onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
-                        {confirmPasswordVisible ? <EyeOff /> : <Eye />}
-                    </Button>
-                  </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="password" name="password" type={passwordVisible ? "text" : "password"} placeholder="••••••••" required className="pl-10 pr-10" value={formData.password} onChange={handleInputChange} />
+                        <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground" onClick={() => setPasswordVisible(!passwordVisible)}>
+                            {passwordVisible ? <EyeOff /> : <Eye />}
+                        </Button>
+                    </div>
+                    </div>
+                    <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input id="confirmPassword" name="confirmPassword" type={confirmPasswordVisible ? "text" : "password"} placeholder="••••••••" required className="pl-10 pr-10" value={formData.confirmPassword} onChange={handleInputChange} />
+                        <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground" onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
+                            {confirmPasswordVisible ? <EyeOff /> : <Eye />}
+                        </Button>
+                    </div>
+                    </div>
                 </div>
-              </div>
 
-               <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="course">Course/Branch</Label>
-                   <Select name="course" required>
-                      <SelectTrigger id="course">
-                          <SelectValue placeholder="Select course" />
-                      </SelectTrigger>
-                      <SelectContent>
-                          {courses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                  </Select>
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="year">Year</Label>
-                    <Select name="year" required>
-                        <SelectTrigger id="year">
-                            <SelectValue placeholder="Select year" />
+                <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                    <Label htmlFor="course">Course/Branch</Label>
+                    <Select name="course" required onValueChange={(value) => handleSelectChange('course', value)} value={formData.course}>
+                        <SelectTrigger id="course">
+                            <SelectValue placeholder="Select course" />
                         </SelectTrigger>
                         <SelectContent>
-                            {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                            {courses.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                         </SelectContent>
                     </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="year">Year</Label>
+                        <Select name="year" required onValueChange={(value) => handleSelectChange('year', value)} value={formData.year}>
+                            <SelectTrigger id="year">
+                                <SelectValue placeholder="Select year" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
-              </div>
 
-              <Button type="submit" className="w-full !mt-6" disabled={loading}>
-                {loading ? 'Creating Account...' : 'Create Account'}
-              </Button>
-            </form>
+                <Button type="submit" className="w-full !mt-6" disabled={loading}>
+                    {loading ? 'Sending OTP...' : 'Continue'}
+                </Button>
+                </form>
+            )}
+
+            {step === 2 && (
+                <form onSubmit={handleVerifyOtpAndSignup} className="space-y-6">
+                    <div className="flex flex-col items-center justify-center">
+                        <KeyRound className="h-8 w-8 text-primary mb-4" />
+                        <InputOTP maxLength={6} value={otp} onChange={setOtp}>
+                            <InputOTPGroup>
+                                <InputOTPSlot index={0} />
+                                <InputOTPSlot index={1} />
+                                <InputOTPSlot index={2} />
+                                <InputOTPSlot index={3} />
+                                <InputOTPSlot index={4} />
+                                <InputOTPSlot index={5} />
+                            </InputOTPGroup>
+                        </InputOTP>
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading || otp.length < 6}>
+                        {loading ? 'Verifying...' : 'Verify & Create Account'}
+                    </Button>
+                    <Button variant="link" className="w-full" onClick={() => setStep(1)}>Back to Signup</Button>
+                </form>
+            )}
             
             <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
@@ -214,5 +284,5 @@ export default function SignupPage() {
         </Card>
       </div>
     </div>
-  );
-}
+    
+    
