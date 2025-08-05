@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { questionPapers as initialQuestionPapers, type QuestionPaper } from '@/lib/data';
+import { initialQuestionPapers, type QuestionPaper } from '@/lib/data';
 
 const QP_STORAGE_KEY = 'b-tech-hub-question-papers';
 
@@ -37,7 +37,7 @@ export function useQuestionPapers() {
     updateStoredPapers(updatedPapers);
   };
 
-  const deleteQuestionPaper = (paperId: number) => {
+  const deleteQuestionPaper = (paperId: string) => {
     const updatedPapers = questionPapers.filter(paper => paper.id !== paperId);
     updateStoredPapers(updatedPapers);
   };
