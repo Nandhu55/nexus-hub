@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { cn, transformGoogleDriveLink } from '@/lib/utils';
 import type { Book } from '@/lib/data';
-import Remarks from '@/components/features/remarks';
 import PdfViewer from './PdfViewer';
 import { Separator } from '../ui/separator';
 
@@ -166,8 +165,6 @@ export default function BookDisplay({ book }: BookDisplayProps) {
                         <h2 className="font-headline text-2xl font-semibold">Description</h2>
                         <p>{book.description}</p>
                     </div>
-
-                    <Remarks bookId={book.id} />
                 </div>
             </div>
         </div>

@@ -65,7 +65,7 @@ export default function ExamPapersPage() {
 
 
   const handleDownload = (paper: QuestionPaper) => {
-    if (paper.download_url === '#') {
+    if (!paper.download_url || paper.download_url === '#') {
         toast({
             title: "Download Unavailable",
             description: "A file for this question paper is not available yet.",

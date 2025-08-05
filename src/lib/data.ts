@@ -36,14 +36,6 @@ export type QuestionPaper = {
   download_url: string;
 };
 
-export type Remark = {
-  id: string;
-  book_id: string;
-  user_id: string;
-  text: string;
-  timestamp: string;
-}
-
 export type Notification = {
   id: string;
   user_id: string;
