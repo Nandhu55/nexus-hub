@@ -68,7 +68,7 @@ export default function LandingPage() {
                         className={`transition-all duration-700 ease-out delay-200 ${mounted ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
                     >
                         <img
-                          src="https://placehold.co/600x400.png"
+                          src="https://img.freepik.com/free-photo/luxury-reading-material-illuminates-old-fashioned-elegance-indoors-generated-by-ai_188544-37881.jpg?t=st=1754374179~exp=1754377779~hmac=7a5c2919d49c97dcfae3958a25f342432628a3dae7d717450cdf1995b936a3db&w=826"
                           alt="B-Tech Hub Platform"
                           className="mx-auto aspect-video overflow-hidden rounded-xl object-cover"
                           data-ai-hint="library technology"
