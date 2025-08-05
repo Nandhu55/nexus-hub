@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BookOpen, LogOut, ShieldCheck, Compass } from 'lucide-react';
+import { BookOpen, LogOut, ShieldCheck, Compass, FileText } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -16,6 +16,7 @@ import { ThemeToggle } from '../common/theme-toggle';
 
 const menuItems = [
   { href: '/library', label: 'Library', icon: BookOpen },
+  { href: '/exam-papers', label: 'Exam Papers', icon: FileText },
   { href: '/career-guidance', label: 'Career Guidance', icon: Compass },
   { href: '/admin/dashboard', label: 'Admin', icon: ShieldCheck },
 ];

@@ -8,6 +8,17 @@ export type Book = {
   content: string;
 };
 
+export type QuestionPaper = {
+    id: number;
+    subject: string;
+    category: string;
+    year: string;
+    semester: string;
+    university: string;
+    type: 'Mid-Term' | 'End-Term' | 'Quiz';
+    downloadUrl: string;
+};
+
 export const bookCategories: Book['category'][] = ['Fiction', 'Sci-Fi', 'Fantasy', 'History', 'Tech'];
 
 export const books: Book[] = [
@@ -99,4 +110,47 @@ export const years = [
     '2nd Year',
     '3rd Year',
     '4th Year'
+];
+
+export const questionPapers: QuestionPaper[] = [
+    {
+        id: 1,
+        subject: 'Data Structures & Algorithms',
+        category: 'Computer Science & Engineering',
+        year: '2nd Year',
+        semester: '4th Sem',
+        university: 'Tech University',
+        type: 'End-Term',
+        downloadUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
+    },
+    {
+        id: 2,
+        subject: 'Analog Electronics',
+        category: 'Electronics & Communication Engineering',
+        year: '2nd Year',
+        semester: '3rd Sem',
+        university: 'Tech University',
+        type: 'Mid-Term',
+        downloadUrl: '#',
+    },
+     {
+        id: 3,
+        subject: 'Thermodynamics',
+        category: 'Mechanical Engineering',
+        year: '3rd Year',
+        semester: '5th Sem',
+        university: 'Central University',
+        type: 'End-Term',
+        downloadUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
+    },
+     {
+        id: 4,
+        subject: 'Database Management Systems',
+        category: 'Computer Science & Engineering',
+        year: '3rd Year',
+        semester: '6th Sem',
+        university: 'Tech University',
+        type: 'End-Term',
+        downloadUrl: 'https://drive.google.com/file/d/1a2b3c4d5e6f7g8h9i0j/view?usp=sharing',
+    },
 ];
