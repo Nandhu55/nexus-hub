@@ -112,11 +112,7 @@ export default function SignupPage() {
         if (profileError) {
             toast({ title: "Profile Creation Error", description: profileError.message, variant: "destructive" });
         } else {
-             toast({
-                title: "Check your email",
-                description: "A verification link has been sent to you. Please confirm to log in.",
-            });
-            router.push('/login');
+            router.push('/verify-email');
         }
     }
     setLoading(false);
