@@ -112,8 +112,11 @@ export default function SignupPage() {
         if (profileError) {
             toast({ title: "Profile Creation Error", description: profileError.message, variant: "destructive" });
         } else {
-             // Redirect to a page that tells the user to check their email
-             router.push('/verify-email');
+             toast({
+                title: "Check your email",
+                description: "A verification link has been sent to you. Please confirm to log in.",
+            });
+            router.push('/login');
         }
     }
     setLoading(false);
@@ -246,5 +249,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
-    
