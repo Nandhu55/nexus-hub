@@ -93,9 +93,25 @@ export default function SignupPage() {
     if (error) {
         toast({ title: "Signup Error", description: error.message, variant: "destructive" });
     } else if (data.user) {
-        // Supabase sends a confirmation email. The user is not yet signed in.
-        // Redirect to a page that tells them to check their email.
-        router.push('/verify-email');
+        const { error: profileError } = await supabase
+            .from('users')
+            .insert({
+                id: data.user.id,
+                name: `${formData.firstName} ${formData.lastName}`,
+                first_name: formData.firstName,
+                last_name: formData.lastName,
+                username: formData.username,
+                email: formData.email,
+                course: formData.course,
+                year: formData.year,
+                signed_up_at: data.user.created_at,
+            });
+
+        if (profileError) {
+            toast({ title: "Profile Creation Error", description: profileError.message, variant: "destructive" });
+        } else {
+             router.push('/verify-email');
+        }
     }
     setLoading(false);
   }
