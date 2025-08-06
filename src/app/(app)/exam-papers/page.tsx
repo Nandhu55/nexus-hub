@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, BookOpen, X, ArrowLeft } from 'lucide-react';
+import { Download, BookOpen, ExternalLink, X, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -18,7 +18,6 @@ import { years } from '@/lib/data';
 import { Separator } from '@/components/ui/separator';
 import type { QuestionPaper } from '@/lib/data';
 import { transformGoogleDriveLink } from '@/lib/utils';
-import PdfViewer from '@/components/features/PdfViewer';
 import { createClient } from '@/lib/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -30,7 +29,6 @@ export default function ExamPapersPage() {
 
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedYear, setSelectedYear] = useState('All');
-  const [readingPaper, setReadingPaper] = useState<QuestionPaper | null>(null);
 
   useEffect(() => {
     const fetchPapersAndCategories = async () => {
@@ -79,7 +77,8 @@ export default function ExamPapersPage() {
 
   const handleRead = (paper: QuestionPaper) => {
     if (paper.download_url && paper.download_url !== '#') {
-      setReadingPaper(paper);
+      const readUrl = transformGoogleDriveLink(paper.download_url, false);
+      window.open(readUrl, '_blank');
     } else {
        toast({
             title: "Read Unavailable",
@@ -97,33 +96,6 @@ export default function ExamPapersPage() {
 
   const displayYears = ['All', ...years];
   const displayCategories = ['All', ...categories];
-  
-  if (readingPaper) {
-    const readUrl = transformGoogleDriveLink(readingPaper.download_url, false);
-    return (
-       <div className="fixed inset-0 bg-background z-50 flex flex-col">
-          <header className="flex items-center justify-between p-2 sm:p-4 border-b bg-card">
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="sm:hidden" onClick={() => setReadingPaper(null)}>
-                    <ArrowLeft className="h-5 w-5" />
-                    <span className="sr-only">Back</span>
-                </Button>
-                <div>
-                    <h1 className="font-bold text-lg line-clamp-1">{readingPaper.subject}</h1>
-                    <p className="text-sm text-muted-foreground">{readingPaper.category} - {readingPaper.year}</p>
-                </div>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setReadingPaper(null)}>
-                  <X className="h-5 w-5" />
-                  <span className="sr-only">Close Reader</span>
-              </Button>
-          </header>
-          <div className="flex-1 overflow-auto p-4">
-             <PdfViewer file={readUrl} />
-          </div>
-      </div>
-    )
-  }
 
   return (
     <>
@@ -226,7 +198,7 @@ export default function ExamPapersPage() {
                       <TableCell><Badge variant="outline">{paper.type}</Badge></TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button size="sm" variant="outline" onClick={() => handleRead(paper)}>
-                          <BookOpen className="mr-2 h-4 w-4" /> Read
+                          <BookOpen className="mr-2 h-4 w-4" /> Read <ExternalLink className="ml-2 h-4 w-4" />
                         </Button>
                         <Button size="sm" onClick={() => handleDownload(paper)}>
                           <Download className="mr-2 h-4 w-4" /> Download
@@ -255,7 +227,7 @@ export default function ExamPapersPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                           <Button variant="outline" onClick={() => handleRead(paper)}>
-                              <BookOpen className="mr-2 h-4 w-4" /> Read
+                              <BookOpen className="mr-2 h-4 w-4" /> Read <ExternalLink className="ml-2 h-4 w-4" />
                           </Button>
                           <Button onClick={() => handleDownload(paper)}>
                               <Download className="mr-2 h-4 w-4" /> Download

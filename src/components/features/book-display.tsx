@@ -3,13 +3,12 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Download, Share2, BookOpen, ArrowLeft, Star, X } from 'lucide-react';
+import { Download, Share2, BookOpen, ArrowLeft, Star, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { cn, transformGoogleDriveLink } from '@/lib/utils';
 import type { Book } from '@/lib/data';
-import PdfViewer from './PdfViewer';
 import { Separator } from '../ui/separator';
 
 interface BookDisplayProps {
@@ -19,7 +18,6 @@ interface BookDisplayProps {
 export default function BookDisplay({ book }: BookDisplayProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const [isReading, setIsReading] = useState(false);
 
   const hasPdf = book.pdf_url && book.pdf_url !== '#';
   const readUrl = hasPdf ? transformGoogleDriveLink(book.pdf_url, false) : '#';
@@ -70,34 +68,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
       });
       return;
     }
-    setIsReading(true);
-  }
-
-  if (isReading) {
-    return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col">
-          <header className="flex items-center justify-between p-2 sm:p-4 border-b bg-card">
-              <div className="flex items-center gap-4">
-                <Button variant="ghost" onClick={() => setIsReading(false)} className="hidden sm:inline-flex">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back to Details
-                </Button>
-                 <div className="w-px h-8 bg-border mx-2 hidden sm:block" />
-                <div>
-                    <h1 className="font-bold text-lg line-clamp-1">{book.title}</h1>
-                    <p className="text-sm text-muted-foreground">{book.author}</p>
-                </div>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsReading(false)}>
-                  <X className="h-5 w-5" />
-                  <span className="sr-only">Close Reader</span>
-              </Button>
-          </header>
-          <div className="flex-1 overflow-auto p-4">
-             <PdfViewer file={readUrl} />
-          </div>
-      </div>
-    );
+    window.open(readUrl, '_blank');
   }
   
   return (
@@ -147,6 +118,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
                     <Button size="lg" onClick={handleRead}>
                         <BookOpen className="mr-2 h-5 w-5" />
                         Read Now
+                        <ExternalLink className="ml-2 h-4 w-4" />
                     </Button>
                     <Button variant="outline" onClick={handleDownload}>
                         <Download className="mr-2 h-5 w-5" />
