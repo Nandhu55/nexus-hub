@@ -93,27 +93,7 @@ export default function SignupPage() {
     if (error) {
         toast({ title: "Signup Error", description: error.message, variant: "destructive" });
     } else if (data.user) {
-        // This is the correct place to create the public user profile.
-        // It runs after the user has been created in the `auth.users` table.
-        const { error: profileError } = await supabase
-            .from('users')
-            .insert({
-                id: data.user.id, // Ensure the ID matches the auth user ID
-                name: `${formData.firstName} ${formData.lastName}`,
-                first_name: formData.firstName,
-                last_name: formData.lastName,
-                username: formData.username,
-                email: formData.email,
-                course: formData.course,
-                year: formData.year,
-                signed_up_at: data.user.created_at,
-            });
-
-        if (profileError) {
-            toast({ title: "Profile Creation Error", description: profileError.message, variant: "destructive" });
-        } else {
-            router.push('/verify-email');
-        }
+        router.push('/verify-email');
     }
     setLoading(false);
   }
