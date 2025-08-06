@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
@@ -30,17 +31,46 @@ export default function ProfilePage() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {
-        const { data: profileData, error } = await supabase
+        let { data: profileData, error } = await supabase
             .from('users')
             .select('*')
             .eq('id', user.id)
             .single();
 
-        if (error) {
+        if (error && error.code === 'PGRST116') {
+            // Profile does not exist, so create it.
+            const newUserProfile = {
+                id: user.id,
+                email: user.email!,
+                name: user.user_metadata.name || 'New User',
+                first_name: user.user_metadata.first_name || '',
+                last_name: user.user_metadata.last_name || '',
+                username: user.user_metadata.username || user.email!.split('@')[0],
+                course: user.user_metadata.course || 'Not set',
+                year: user.user_metadata.year || 'Not set',
+                signed_up_at: user.created_at,
+                avatar_url: user.user_metadata.avatar_url || '',
+            };
+            
+            const { data: createdProfile, error: creationError } = await supabase
+                .from('users')
+                .insert(newUserProfile)
+                .select()
+                .single();
+            
+            if (creationError) {
+                toast({ title: 'Error creating profile', description: creationError.message, variant: 'destructive' });
+            } else {
+                profileData = createdProfile;
+                toast({ title: 'Profile Created', description: 'Your profile has been initialized.' });
+            }
+
+        } else if (error) {
             toast({ title: 'Error fetching profile', description: error.message, variant: 'destructive' });
-        } else {
-            setCurrentUser(profileData);
         }
+        
+        setCurrentUser(profileData);
+
     }
     setLoading(false);
   }, [supabase, toast]);
@@ -276,3 +306,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    
