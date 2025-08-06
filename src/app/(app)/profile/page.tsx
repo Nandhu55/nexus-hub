@@ -40,7 +40,7 @@ export default function ProfilePage() {
         if (error && error.code === 'PGRST116') {
             // Profile does not exist, so create it.
             const newUserProfile = {
-                id: user.id,
+                id: user.id, // Ensure the ID of the new row matches the authenticated user's ID
                 email: user.email!,
                 name: user.user_metadata.name || 'New User',
                 first_name: user.user_metadata.first_name || '',
