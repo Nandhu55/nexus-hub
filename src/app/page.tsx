@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/common/theme-toggle';
 import { createClient } from '@/lib/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
 
 export default function LandingPage() {
     const [mounted, setMounted] = useState(false);
@@ -32,6 +34,25 @@ export default function LandingPage() {
         title: 'Career Guidance',
         description: 'Find career advice, resume tips, and interview preparation resources.',
       },
+    ];
+
+    const faqItems = [
+      {
+        question: 'What is B-Tech Hub?',
+        answer: 'B-Tech Hub is a comprehensive e-library and resource platform designed specifically for B.Tech students. It provides access to academic books, question papers, AI-powered study tools, and career guidance resources all in one place.',
+      },
+      {
+        question: 'Is there a mobile app available?',
+        answer: 'Currently, B-Tech Hub is fully responsive and accessible through any modern web browser on your phone or tablet. A dedicated mobile app is on our roadmap for future development.',
+      },
+      {
+        question: 'How can I contribute?',
+        answer: 'We welcome contributions of academic materials like notes or question papers. Please use the contact form to get in touch with our team about how you can help expand our library.',
+      },
+      {
+        question: 'Is my data secure?',
+        answer: 'Yes, we take data security very seriously. All user data is handled with strict privacy controls, and we use modern encryption standards to protect your information. Your academic progress and personal details are kept confidential.',
+      }
     ];
 
     return (
@@ -87,7 +108,7 @@ export default function LandingPage() {
                         />
                     </div>
                 </section>
-                <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
+                <section className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50">
                     <div className="container px-4 md:px-6">
                         <div className="flex flex-col items-center justify-center space-y-4 text-center">
                             <div className="space-y-2">
@@ -99,7 +120,7 @@ export default function LandingPage() {
                         </div>
                         <div className="mx-auto grid max-w-5xl items-stretch gap-6 py-12 md:grid-cols-3">
                             {features.map((feature, index) => (
-                                <Card key={index} className="flex flex-col justify-start items-start p-6 bg-card/50 border-primary/20 hover:border-primary/80 hover:shadow-[0_0_20px_theme(colors.primary.DEFAULT)] transition-all">
+                                <Card key={index} className="flex flex-col justify-start items-start p-6 bg-background border-primary/20 hover:border-primary/80 hover:shadow-[0_0_20px_theme(colors.primary.DEFAULT)] transition-all">
                                     <div className="p-3 rounded-full bg-primary/10 mb-4">
                                         <feature.icon className="h-8 w-8 text-primary" />
                                     </div>
@@ -111,6 +132,30 @@ export default function LandingPage() {
                                     </CardContent>
                                 </Card>
                             ))}
+                        </div>
+                    </div>
+                </section>
+                <section className="w-full py-12 md:py-24 lg:py-32 bg-background">
+                    <div className="container px-4 md:px-6">
+                        <div className="flex flex-col items-center justify-center space-y-4 text-center">
+                             <div className="space-y-2">
+                                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl font-headline">Frequently Asked Questions</h2>
+                                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                                    Have questions? We've got answers.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="mx-auto max-w-3xl w-full mt-12">
+                            <Accordion type="single" collapsible className="w-full">
+                                {faqItems.map((item, index) => (
+                                    <AccordionItem value={`item-${index}`} key={index}>
+                                        <AccordionTrigger className="text-lg font-medium">{item.question}</AccordionTrigger>
+                                        <AccordionContent className="text-muted-foreground">
+                                            {item.answer}
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
                         </div>
                     </div>
                 </section>
