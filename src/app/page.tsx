@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/common/theme-toggle';
 import { createClient } from '@/lib/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { FaTwitter, FaLinkedinIn, FaGithub, FaInstagram } from 'react-icons/fa';
 
 
 export default function LandingPage() {
@@ -180,14 +181,16 @@ export default function LandingPage() {
                     </div>
                 </section>
             </main>
-            <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
-                <div className="flex items-center gap-2">
-                    <BookMarked className="h-6 w-6 text-primary" />
-                    <p className="text-md font-bold font-headline">B-Tech Hub</p>
+             <footer className="bg-background border-t py-8">
+                <div className="container text-center text-muted-foreground">
+                    <p>B-Tech Hub — Created by <strong>G. Nandhishwar Reddy</strong></p>
+                    <div className="flex justify-center gap-4 mt-4">
+                        <a href="#" aria-label="Twitter" className="hover:text-primary transition-colors"><FaTwitter size={20} /></a>
+                        <a href="#" aria-label="LinkedIn" className="hover:text-primary transition-colors"><FaLinkedinIn size={20} /></a>
+                        <a href="#" aria-label="GitHub" className="hover:text-primary transition-colors"><FaGithub size={20} /></a>
+                        <a href="#" aria-label="Instagram" className="hover:text-primary transition-colors"><FaInstagram size={20} /></a>
+                    </div>
                 </div>
-                <p className="text-xs text-muted-foreground sm:ml-auto">
-                    Your gateway to academic excellence and community learning.
-                </p>
             </footer>
         </div>
     );
