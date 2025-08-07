@@ -47,7 +47,7 @@ export default function LandingPage() {
       },
       {
         question: 'How can I contribute?',
-        answer: 'We welcome contributions of academic materials like notes or question papers. Please use the contact form to get in touch with our team about how you can help expand our library.',
+        answer: 'We welcome contributions of academic materials like notes or question papers. Please use the contact form or email us at gnreddy255@gmail.com to get in touch with our team about how you can help expand our library.',
       },
       {
         question: 'Is my data secure?',
