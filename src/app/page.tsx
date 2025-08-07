@@ -56,7 +56,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <div className="flex min-h-screen w-full flex-col">
+        <div className="flex min-h-screen w-full flex-col bg-background">
             <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
                 <div className="container flex h-16 items-center px-4">
                     <Link href="/" className="flex items-center gap-3 group">
@@ -159,7 +159,36 @@ export default function LandingPage() {
                         </div>
                     </div>
                 </section>
+                <section className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50">
+                    <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
+                        <div className="space-y-3">
+                            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight font-headline">
+                                Ready to Transform Your Learning?
+                            </h2>
+                            <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                                Join thousands of students who are already using B-Tech Hub to excel in their academic journey.
+                            </p>
+                        </div>
+                        <div className="mx-auto w-full max-w-sm space-y-2">
+                            <Button asChild size="lg">
+                                <Link href="/login">
+                                    Get Started Today
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
+                        </div>
+                    </div>
+                </section>
             </main>
+            <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
+                <div className="flex items-center gap-2">
+                    <BookMarked className="h-6 w-6 text-primary" />
+                    <p className="text-md font-bold font-headline">B-Tech Hub</p>
+                </div>
+                <p className="text-xs text-muted-foreground sm:ml-auto">
+                    Your gateway to academic excellence and community learning.
+                </p>
+            </footer>
         </div>
     );
 }
