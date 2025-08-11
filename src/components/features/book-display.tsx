@@ -15,7 +15,11 @@ import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { Card } from '../ui/card';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
+
 
 interface BookDisplayProps {
   book: Book;
@@ -126,7 +130,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
                             file={readUrl}
                             onLoadSuccess={onDocumentLoadSuccess}
                             onLoadError={onDocumentLoadError}
-                            options={{ CMapReaderFactory: null }}
+                            options={{ cMap: false }}
                         >
                            <Page pageNumber={pageNumber} width={1000} />
                         </Document>
