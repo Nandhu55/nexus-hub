@@ -1,19 +1,5 @@
 import type {NextConfig} from 'next';
 
-// Polyfill for Promise.withResolvers, which is used by react-pdf but may not be available in all Node.js versions.
-if (!Promise.withResolvers) {
-  Promise.withResolvers = function () {
-    let resolve, reject;
-    const promise = new Promise((res, rej) => {
-      resolve = res;
-      reject = rej;
-    });
-    // @ts-ignore
-    return { promise, resolve, reject };
-  };
-}
-
-
 const nextConfig: NextConfig = {
   /* config options here */
   typescript: {

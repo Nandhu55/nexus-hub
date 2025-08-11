@@ -1,25 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Download, Share2, BookOpen, ArrowLeft, Star, ExternalLink, X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Download, Share2, BookOpen, ArrowLeft, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { cn, transformGoogleDriveLink } from '@/lib/utils';
 import type { Book } from '@/lib/data';
 import { Separator } from '../ui/separator';
-import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
-import { Card } from '../ui/card';
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
-
 
 interface BookDisplayProps {
   book: Book;
@@ -28,10 +17,6 @@ interface BookDisplayProps {
 export default function BookDisplay({ book }: BookDisplayProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const [showPdf, setShowPdf] = useState(false);
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pdfLoading, setPdfLoading] = useState(true);
 
   const hasPdf = book.pdf_url && book.pdf_url !== '#';
   const readUrl = hasPdf ? transformGoogleDriveLink(book.pdf_url, false) : '#';
@@ -73,19 +58,6 @@ export default function BookDisplay({ book }: BookDisplayProps) {
     window.open(downloadUrl, '_blank');
   };
 
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-    setPdfLoading(false);
-    setPageNumber(1);
-  };
-  
-  const onDocumentLoadError = (error: Error) => {
-    console.error(error);
-    toast({ title: 'Error loading PDF', description: 'Could not load the book. The file may be corrupt or inaccessible.', variant: 'destructive' });
-    setPdfLoading(false);
-    setShowPdf(false);
-  }
-
   const handleRead = () => {
      if (!hasPdf) {
         toast({
@@ -95,61 +67,7 @@ export default function BookDisplay({ book }: BookDisplayProps) {
         });
         return;
       }
-      setShowPdf(true);
-  }
-
-  const changePage = (offset: number) => {
-    if (numPages) {
-        setPageNumber(prevPageNumber => Math.max(1, Math.min(prevPageNumber + offset, numPages)));
-    }
-  }
-
-  const previousPage = () => changePage(-1);
-  const nextPage = () => changePage(1);
-  
-  if (showPdf) {
-    return (
-        <div className="fixed inset-0 bg-background/90 backdrop-blur-sm z-50 p-4 flex flex-col items-center gap-4">
-           <div className="w-full max-w-4xl flex justify-between items-center bg-card p-2 rounded-lg border">
-                <h3 className="font-headline text-lg truncate px-2">{book.title}</h3>
-                <Button variant="destructive" size="icon" onClick={() => setShowPdf(false)}>
-                    <X className="h-5 w-5" />
-                    <span className="sr-only">Close Reader</span>
-                </Button>
-           </div>
-            <Card className="w-full max-w-4xl flex-1 overflow-hidden p-0">
-                <div className="relative h-full w-full">
-                    {pdfLoading && (
-                        <div className="absolute inset-0 flex flex-col justify-center items-center bg-background/50">
-                            <Loader2 className="h-10 w-10 animate-spin text-primary mb-4"/>
-                            <p className="text-muted-foreground">Loading Book...</p>
-                        </div>
-                    )}
-                    <div className={cn("h-full w-full overflow-auto", pdfLoading ? "opacity-0" : "opacity-100")}>
-                        <Document
-                            file={readUrl}
-                            onLoadSuccess={onDocumentLoadSuccess}
-                            onLoadError={onDocumentLoadError}
-                            options={{ cMap: false }}
-                        >
-                           <Page pageNumber={pageNumber} width={1000} />
-                        </Document>
-                    </div>
-                </div>
-            </Card>
-            {numPages && !pdfLoading && (
-                <div className="flex items-center gap-4 bg-card p-2 rounded-lg border">
-                    <Button onClick={previousPage} disabled={pageNumber <= 1} variant="outline" size="icon">
-                        <ChevronLeft />
-                    </Button>
-                    <p className="text-sm font-medium">Page {pageNumber} of {numPages}</p>
-                    <Button onClick={nextPage} disabled={pageNumber >= numPages} variant="outline" size="icon">
-                        <ChevronRight />
-                    </Button>
-                </div>
-            )}
-        </div>
-    )
+      router.push(`/view-pdf?url=${encodeURIComponent(readUrl)}`);
   }
   
   return (
