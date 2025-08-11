@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Book } from '@/lib/data';
-import { years } from '@/lib/data';
+import { years, units } from '@/lib/data';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -49,23 +49,26 @@ export default function LibraryPage() {
     const featuredBooks = useMemo(() => books.slice(0, 10), [books]);
     const academicCategories = useMemo(() => ['All', ...categories], [categories]);
     const displayYears = useMemo(() => ['All', ...years], []);
+    const displayUnits = useMemo(() => ['All', ...units], []);
 
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedUnit, setSelectedUnit] = useState('All');
     const [selectedYear, setSelectedYear] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredBooks = useMemo(() => {
         return books.filter(book => {
             const categoryMatch = selectedCategory === 'All' || book.category === selectedCategory;
+            const unitMatch = selectedUnit === 'All' || book.unit === selectedUnit;
             const yearMatch = selectedYear === 'All' || book.year === selectedYear;
             const searchMatch = searchQuery.trim() === '' || 
                                 book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                 book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
                                 book.category.toLowerCase().includes(searchQuery.toLowerCase());
             
-            return categoryMatch && yearMatch && searchMatch;
+            return categoryMatch && unitMatch && yearMatch && searchMatch;
         });
-    }, [books, selectedCategory, selectedYear, searchQuery]);
+    }, [books, selectedCategory, selectedUnit, selectedYear, searchQuery]);
 
   return (
     <div className="space-y-8 sm:space-y-12">
@@ -146,6 +149,19 @@ export default function LibraryPage() {
                                 onClick={() => setSelectedCategory(category)}
                             >
                                 {category}
+                            </Button>
+                        ))}
+                    </div>
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-muted-foreground w-full sm:w-20 shrink-0">Unit:</span>
+                        {displayUnits.map(unit => (
+                            <Button 
+                                key={unit}
+                                size="sm"
+                                variant={selectedUnit === unit ? 'default' : 'outline'}
+                                onClick={() => setSelectedUnit(unit)}
+                            >
+                                {unit}
                             </Button>
                         ))}
                     </div>

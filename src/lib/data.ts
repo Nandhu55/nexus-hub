@@ -3,6 +3,7 @@ export type Book = {
   title: string;
   author: string;
   category: string;
+  unit: string;
   year: string;
   description: string;
   cover_image: string;
@@ -49,4 +50,5 @@ export type Notification = {
 
 export const courses = ['Computer Science', 'Electronics', 'Mechanical', 'Civil Engineering'];
 export const years = ['1st Year', '2nd Year', '3rd Year', '4th Year'];
+export const units = ['Unit-1', 'Unit-2', 'Unit-3', 'Unit-4', 'Unit-5'];
 export const semesters = ['1st Sem', '2nd Sem', '3rd Sem', '4th Sem', '5th Sem', '6th Sem', '7th Sem', '8th Sem'];
